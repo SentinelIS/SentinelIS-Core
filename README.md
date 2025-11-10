@@ -8,6 +8,10 @@ Test
 │   ├─ company.sql         
 │   └─ user.sql
 │
+├─ docker/     
+│   ├─ .env         
+│   └─ docker-compose.yaml         
+│
 ├─ frontend/             
 │   ├─ styles/
 │   │   └─ login.css
@@ -20,7 +24,8 @@ Test
 ├─ main.js
 ├─ package-lock.json
 ├─ package.json
-└─ README.md
+├─ README.md
+└─ start.sh
 ```
 
 ## Techstack
@@ -28,6 +33,9 @@ Test
 - HTML
 - CSS
 - JavaScript
+
+### Backend
+- Docker
 
 ### Database
 - MySQL
