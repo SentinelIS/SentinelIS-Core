@@ -5,7 +5,7 @@ IS = Information Security
 
 ## Folder Structure
 ```yaml
-Test
+SentinelIS
 │
 ├─ database/
 │   ├─ chat/
