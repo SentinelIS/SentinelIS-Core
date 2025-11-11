@@ -9,6 +9,8 @@ SentinelIS
 │
 ├─ database/
 │   ├─ chat/
+│   │   ├─ querys
+│   │   │   └─ query.sql              
 │   │   ├─ conversation.sql 
 │   │   ├─ conversation-participants.sql
 │   │   └─ messages.sql              
