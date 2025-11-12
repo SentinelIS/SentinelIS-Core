@@ -10,7 +10,7 @@ function createWindow() {
         }
     });
 
-    win.loadFile('frontend/login.html');
+    win.loadURL('http://localhost:3000/login.html');
 }
 
 app.whenReady().then(() => {
