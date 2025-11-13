@@ -54,3 +54,13 @@ INSERT INTO USERS (COMP_ID, USER_ABBR, USER_SURNAME, USER_FIRST_NAME, USER_ROLE,
 (14, 'GRA', 'Green', 'Abigail', 'Software Engineer', 'password123'),
 (15, 'ADL', 'Adams', 'Lucas', 'Cloud Admin', 'password123'),
 (15, 'BAH', 'Baker', 'Harper', 'Software Engineer', 'password123');
+
+
+
+INSERT INTO ASSET_MGMT (USER_CR_ID, COMP_ID) VALUES 
+(1, 1),
+(2, 1),
+(3, 2),
+(1, 3),
+(2, 2),
+(3, 3);

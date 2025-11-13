@@ -23,6 +23,7 @@ SentinelIS
 │
 ├─ database/
 │   ├─ asset-mgmt/
+│   │   ├─ assets_detail.js
 │   │   └─ assets.sql
 │   ├─ chat/
 │   │   ├─ querys/
@@ -81,7 +82,7 @@ SentinelIS
 ### Database
 - MySQL
 
-## Testing
+### Testing
 - Java
 - Python
 
