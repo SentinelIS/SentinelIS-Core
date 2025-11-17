@@ -10,6 +10,59 @@
     <title>Setup</title>
 </head>
 <body>
+    <h1>Setup</h1>
+    <form id="SetupForm">
+        <label for="company-name"> Company Name</label>
+        <p>Enter the name for the company you're setting SentinelIS up for.</p>
+        <input type="text" id="company-name" name="company-name" required>
+
+        <br>
+
+        <label for="company-desc"> Company Description</label>
+        <p>Enter a brief description of your company.</p>
+        <input type="text" id="company-desc" name="company-desc" required>
+
+        <br>
+
+        <label for="role"> Initials</label>
+        <p>Enter your initials. You can enter up to 4 characters. These initials will later be your username.</p>
+        <input type="text" id="role" name="role" required>
+
+        <label for="firstname"> First Name</label>
+        <p>Enter your First name</p>
+        <input type="text" id="firstname" name="firstname" required>
+
+        <br>
+
+        <label for="surname"> Surname</label>
+        <p>Enter your Surname</p>
+        <input type="text" id="surname" name="surname" required>
+
+        <br>
+
+        <label for="role"> Role</label>
+        <p>Enter your Role</p>
+        <input type="text" id="username" name="role" required>
+
+        <br>
+        
+        <label for="password"> Password</label>
+        <p>Enter a strong Password</p>
+        <input type="password" id="password" name="password" required>
+
+        <br>
+
+        <label for="password-repeat"> Repeat Password</label>
+        <p>Repeat the Password to confirm</p>
+        <input type="password" id="password-repeat" name="password-repeat" required>
+
+        <br>
+
+        <p>As the creator of the company, you can edit or update the information later.</p>
+        
+        <button type="submit">Complete Setup</button>
+    </form>    
+
     <div class="setup-assistant" id="setup-robot">
         <!--Remix Icon for Setup Robot-->
         <i class="ri-robot-3-fill"></i>

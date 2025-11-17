@@ -18,7 +18,9 @@ SentinelIS
 │   │   │   └─ server3000.js
 │   │   └─ python/
 │   │       ├─ .env              
-│   │       └─ TestConnectMongoDB.py
+│   │       ├─ TestConnectGather.py              
+│   │       ├─ TestConnectMongoDB.py              
+│   │       └─ TestListCollections.py
 │   └─ pom.xml   
 │
 ├─ database/
@@ -43,8 +45,6 @@ SentinelIS
 │   └─ docker-compose.yaml         
 │
 ├─ frontend/
-│   ├─ CSS/
-│   │   └─ style-guide.md
 │   ├─ icons/
 │   │   ├─ cli/
 │   │   │   ├─ asciitest.sh              
