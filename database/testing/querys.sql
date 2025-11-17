@@ -1,0 +1,12 @@
+SELECT 
+    u.USER_ID,
+    u.USER_ABBR,
+    u.USER_SURNAME,
+    u.USER_FIRST_NAME,
+    u.USER_ROLE,
+    c.COMP_ID,
+    c.COMP_NAME,
+    c.COMP_DESC,
+    c.COMP_OWNER_ID
+FROM USERS u
+INNER JOIN COMPANY c ON u.COMP_ID = c.COMP_ID;

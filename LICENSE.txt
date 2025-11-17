@@ -1,21 +1,21 @@
-+============================================================+       
-│                 NON-COMMERCIAL USE LICENSE                 │       
-+============================================================+         
++============================================================+
+│                 NON-COMMERCIAL USE LICENSE                 │
++============================================================+
 + ────────────────────────────────────────────────────────── +
-│ Copyright (c) 2025 Nathan Dion Schmid                      │ 
+│ Copyright (c) 2025 Nathan Dion Schmid                      │
 │ All rights reserved.                                       │
 │                                                            │
-│ Permission is hereby granted to:                           │ 
-│                                                            │  
+│ Permission is hereby granted to:                           │
+│                                                            │
 │  • Download, read, and study the software and all          │
 │    associated documentation for understanding purposes.    │
-│  • Modify the software and/or its source code.             │ 
-│                                                            │ 
-│ Usage and Redistribution:                                  │ 
-│                                                            │ 
-│  • The software may be freely used and modified by         │ 
-│    individuals or companies for personal, educational,     │ 
-│    or internal business purposes.                          │ 
+│  • Modify the software and/or its source code.             │
+│                                                            │
+│ Usage and Redistribution:                                  │
+│                                                            │
+│  • The software may be freely used and modified by         │
+│    individuals or companies for personal, educational,     │
+│    or internal business purposes.                          │
 │  • Redistribution of the software, whether in its original │
 │    or modified form, **for monetary compensation, goods,   │
 │    or services is strictly prohibited**.                   │
