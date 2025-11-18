@@ -77,21 +77,27 @@ SentinelIS
 
 ## Techstack
 ### Frontend
-- HTML
-- CSS
-- JavaScript
+- Electron (GUI)
+- HTML (UI)
+- CSS (Styling)
+- JavaScript ( Frontend Logic / Backend Requests)
 
 ### Backend
-- Node.js
-- Docker
+- Node.js (Runtime)
+- Express.js (HTTP Server Framework)
+- Apollo Server (GraphQL Server)
 
 ### Database
-- MySQL
-- MongoDB
+- MySQL (Relational Database)
+- MongoDB (NoSQL Database)
+
+### Build & Tools
+- Docker (Containerization)
+- npm (Package Manager)
 
 ### Testing
-- Java
-- Python
+- Java (Test Connection to MySQL)
+- Python (Test Connection to MongoDB)
 
 
 ## Note
