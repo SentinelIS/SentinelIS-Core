@@ -13,6 +13,8 @@ SentinelIS
 │   │   │   ├─ ConnectDB.java
 │   │   │   └─ TestConnectDB.java
 │   │   ├─ node/
+│   │   │   ├─ graphql/
+│   │   │   │   └─ scheme.graphql
 │   │   │   ├─ .env
 │   │   │   ├─ logger.js
 │   │   │   ├─ server3000.js
@@ -68,6 +70,10 @@ SentinelIS
 │   └─ setup.html
 │
 ├─ node_modules/
+├─ sqlite/
+│   ├─ data/
+│   │   └─ mydb.sqlite
+│   └─ avatars.sql
 ├─ .gitignore
 ├─ LICENSE.txt
 ├─ main.js
