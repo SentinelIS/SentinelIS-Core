@@ -6,23 +6,23 @@ IS = Information Security
 ## Folder Structure
 ```yaml
 SentinelIS
-│
 ├─ backend/
 │   ├─ main/
 │   │   ├─ java/
-│   │   │   ├─ .env              
-│   │   │   ├─ ConnectDB.java 
+│   │   │   ├─ .env
+│   │   │   ├─ ConnectDB.java
 │   │   │   └─ TestConnectDB.java
 │   │   ├─ node/
-│   │   │   ├─ .env              
-│   │   │   ├─ server3000.js              
+│   │   │   ├─ .env
+│   │   │   ├─ logger.js
+│   │   │   ├─ server3000.js
 │   │   │   └─ server4000.js
 │   │   └─ python/
-│   │       ├─ .env              
-│   │       ├─ TestConnectGather.py              
-│   │       ├─ TestConnectMongoDB.py              
+│   │       ├─ .env
+│   │       ├─ TestConnectGather.py
+│   │       ├─ TestConnectMongoDB.py
 │   │       └─ TestListCollections.py
-│   └─ pom.xml   
+│   └─ pom.xml
 │
 ├─ database/
 │   ├─ asset-mgmt/
@@ -30,29 +30,29 @@ SentinelIS
 │   │   └─ assets.sql
 │   ├─ chat/
 │   │   ├─ querys/
-│   │   │   └─ query.sql              
-│   │   ├─ conversation.sql 
+│   │   │   └─ query.sql
+│   │   ├─ conversation.sql
 │   │   ├─ conversation-participants.sql
-│   │   └─ messages.sql              
+│   │   └─ messages.sql
 │   ├─ testing/
 │   │   ├─ inserts-assets.js
 │   │   ├─ inserts.sql
 │   │   ├─ querys.sql
-│   │   └─ updates.sql              
-│   ├─ company.sql 
-│   ├─ user-preferences.sql         
+│   │   └─ updates.sql
+│   ├─ company.sql
+│   ├─ user-preferences.sql
 │   └─ users.sql
 │
-├─ docker/     
-│   ├─ .env         
-│   └─ docker-compose.yaml         
+├─ docker/
+│   ├─ .env
+│   └─ docker-compose.yaml
 │
 ├─ frontend/
 │   ├─ icons/
 │   │   ├─ cli/
-│   │   │   ├─ asciitest.sh              
-│   │   │   ├─ eye.txt              
-│   │   │   └─ sentinelis.txt              
+│   │   │   ├─ asciitest.sh
+│   │   │   ├─ eye.txt
+│   │   │   └─ sentinelis.txt
 │   │   ├─ icon-white.svg
 │   │   ├─ icon.svg
 │   │   └─ logo.svg
