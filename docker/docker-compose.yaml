@@ -28,6 +28,18 @@ services:
     volumes:
       - mongo_data:/data/db
 
+  sqlite:
+    image: coleifer/sqlite-web
+    container_name: sqlite-db
+    restart: always
+    environment:
+      SQLITE_DATABASE: mydb.sqlite
+    volumes:
+      - sqlite_data:/data
+    ports:
+      - "8081:8080"
+
 volumes:
   mysql_data:
   mongo_data:
+  sqlite_data:
