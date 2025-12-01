@@ -6,71 +6,87 @@
 
     <!--Link for Remix Icons-->
     <link href="https://unpkg.com/remixicon/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles/setup.css">
 
     <title>Setup</title>
 </head>
 <body>
-    <form id="SetupForm">
-        <label for="company-name"><i class="ri-building-4-fill"></i> Company Name</label>
-        <p>Enter the name for the company you're setting SentinelIS up for.</p>
-        <input type="text" id="company-name" name="company-name" required>
+    <main class="setup-shell">
+        <section class="setup-card">
+            <div class="form-intro">
+                <p class="eyebrow">SentinelIS</p>
+                <h1>Provision your company space</h1>
+                <p class="muted">We only need the core details to spin up a secure tenant. You can refine everything later.</p>
+            </div>
 
-        <br>
+            <form id="SetupForm">
+                <div class="field">
+                    <label for="company-name"><i class="ri-building-4-fill"></i> Company Name</label>
+                    <p class="helper">Enter the name for the company you're setting SentinelIS up for.</p>
+                    <input type="text" id="company-name" name="company-name" required>
+                </div>
 
-        <label for="company-desc"><i class="ri-file-text-fill"></i> Company Description</label>
-        <p>Enter a brief description of your company.</p>
-        <input type="text" id="company-desc" name="company-desc" required>
+                <div class="field">
+                    <label for="company-desc"><i class="ri-file-text-fill"></i> Company Description</label>
+                    <p class="helper">Enter a brief description of your company.</p>
+                    <input type="text" id="company-desc" name="company-desc" required>
+                </div>
 
-        <br>
+                <div class="field">
+                    <label for="user-abbr"><i class="ri-account-circle-fill"></i> Initials</label>
+                    <p class="helper">Enter your initials. Up to 4 characters, used later as your username.</p>
+                    <input type="text" id="user-abbr" name="user-abbr" maxlength="4" required>
+                </div>
 
-        <label for="user-abbr"><i class="ri-account-circle-fill"></i> Initials</label>
-        <p>Enter your initials. You can enter up to 4 characters. These initials will later be your username.</p>
-        <input type="text" id="user-abbr" name="user-abbr" required>
+                <div class="field two-col">
+                    <div>
+                        <label for="firstname"><i class="ri-user-3-fill"></i> First Name</label>
+                        <p class="helper">Enter your first name.</p>
+                        <input type="text" id="firstname" name="firstname" required>
+                    </div>
+                    <div>
+                        <label for="surname"><i class="ri-user-3-fill"></i> Surname</label>
+                        <p class="helper">Enter your surname.</p>
+                        <input type="text" id="surname" name="surname" required>
+                    </div>
+                </div>
 
-        <br>
+                <div class="field">
+                    <label for="role"><i class="ri-briefcase-3-fill"></i> Role</label>
+                    <p class="helper">Enter your role.</p>
+                    <input type="text" id="role" name="role" required>
+                </div>
+                
+                <div class="field two-col">
+                    <div>
+                        <label for="password"><i class="ri-lock-fill"></i> Password</label>
+                        <p class="helper">Enter a strong password.</p>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <div>
+                        <label for="password-repeat"><i class="ri-lock-password-fill"></i> Repeat Password</label>
+                        <p class="helper">Repeat the password to confirm.</p>
+                        <input type="password" id="password-repeat" name="password-repeat" required>
+                    </div>
+                </div>
 
-        <label for="firstname"><i class="ri-user-3-fill"></i> First Name</label>
-        <p>Enter your First name</p>
-        <input type="text" id="firstname" name="firstname" required>
+                <p class="note">As the creator of the company, you can edit or update the information later.</p>
+                
+                <button type="submit">Complete Setup</button>
 
-        <br>
+                <!-- error display -->
+                <div id="loginError"></div>
+            </form>    
+        </section>
 
-        <label for="surname"><i class="ri-user-3-fill"></i> Surname</label>
-        <p>Enter your Surname</p>
-        <input type="text" id="surname" name="surname" required>
-
-        <br>
-
-        <label for="role"><i class="ri-briefcase-3-fill"></i> Role</label>
-        <p>Enter your Role</p>
-        <input type="text" id="role" name="role" required>
-
-        <br>
-        
-        <label for="password"><i class="ri-lock-fill"></i> Password</label>
-        <p>Enter a strong Password</p>
-        <input type="password" id="password" name="password" required>
-
-        <br>
-
-        <label for="password-repeat"><i class="ri-lock-password-fill"></i> Repeat Password</label>
-        <p>Repeat the Password to confirm</p>
-        <input type="password" id="password-repeat" name="password-repeat" required>
-
-        <br>
-
-        <p>As the creator of the company, you can edit or update the information later.</p>
-        
-        <button type="submit">Complete Setup</button>
-
-        <!-- error display -->
-        <div id="loginError" style="color: red; margin-top: 0.5rem;"></div>
-    </form>    
-
-    <div class="setup-assistant" id="setup-robot">
-        <!--Remix Icon for Setup Robot-->
-        <i class="ri-robot-3-fill"></i>
-    </div>
+        <aside class="setup-assistant" id="setup-robot">
+            <!--Remix Icon for Setup Robot-->
+            <i class="ri-robot-3-fill"></i>
+            <h2>Chat assistant</h2>
+            <p class="muted">Need help with requirements? Ask me while you configure SentinelIS.</p>
+            <button type="button" class="ghost">Ask Nova</button>
+        </aside>
+    </main>
 
     <script src="scripts/setup-handler.js"></script>
 </body>

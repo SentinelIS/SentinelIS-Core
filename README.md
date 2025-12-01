@@ -115,6 +115,7 @@ SentinelIS
 - Pino for Logging
 - SQLite for saving binary blobs (for images)
 - ASP .NET for Chat system
+- SignalR for Chat
 
 ## Note
 
