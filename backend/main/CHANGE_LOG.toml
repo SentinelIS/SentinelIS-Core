@@ -1,3 +1,32 @@
 # CHANGE_LOG.toml
 
 # A structured for API Endpoint Adds and Changes
+# Dateformat: DD.MM.YYYY
+
+[[GET-api-test]]
+file = "node/server3000.js"
+description = "Test endpoint for API testing."
+method = "GET"
+path = "/api/test"
+create_date = "11.11.2025"
+
+[[POST-api-login]]
+file = "node/server3000.js"
+description = "User login endpoint."
+method = "POST"
+path = "/api/login"
+create_date = "12.11.2025"
+
+[[POST-api-setup]]
+file = "node/server3000.js"
+description = "Setup endpoint for initial configuration."
+method = "POST"
+path = "/api/setup"
+create_date = "17.11.2025"
+
+[[POST-api-users]]
+file = "node/server3000.js"
+description = "Create a new user for an existing company"
+method = "POST"
+path = "/api/users"
+create_date = "01.12.2025"

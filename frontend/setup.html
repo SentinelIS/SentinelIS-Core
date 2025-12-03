@@ -88,6 +88,60 @@
         </aside>
     </main>
 
+    <!-- Setup result modal -->
+    <div id="setupResultOverlay" class="setup-modal-overlay setup-modal-hidden" aria-hidden="true">
+        <div class="setup-modal" role="dialog" aria-labelledby="setupModalTitle" aria-modal="true">
+            <div class="setup-modal-header">
+                <h2 id="setupModalTitle">Company provisioned</h2>
+                <button type="button" class="setup-modal-close" id="setupModalCloseBtn" aria-label="Close">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+            <div class="setup-modal-body">
+                <p class="muted">
+                    Your company space has been created. These are your initial SentinelIS credentials.
+                    Store them securely before continuing.
+                </p>
+                <div class="setup-modal-summary">
+                    <div>
+                        <span class="setup-modal-label">Company</span>
+                        <span id="summaryCompanyName" class="setup-modal-value"></span>
+                    </div>
+                    <div>
+                        <span class="setup-modal-label">Company ID</span>
+                        <span id="summaryCompanyId" class="setup-modal-value code"></span>
+                    </div>
+                    <div>
+                        <span class="setup-modal-label">Admin name</span>
+                        <span id="summaryAdminName" class="setup-modal-value"></span>
+                    </div>
+                    <div>
+                        <span class="setup-modal-label">Admin initials</span>
+                        <span id="summaryAdminInitials" class="setup-modal-value code"></span>
+                    </div>
+                    <div>
+                        <span class="setup-modal-label">Role</span>
+                        <span id="summaryAdminRole" class="setup-modal-value"></span>
+                    </div>
+                </div>
+
+                <p class="setup-modal-warning">
+                    The JSON file you download next contains sensitive information (including your password).
+                    Keep it safe and do not share it publicly.
+                </p>
+            </div>
+            <div class="setup-modal-footer">
+                <button type="button" id="downloadCredentialsBtn">
+                    <i class="ri-download-cloud-2-line"></i>
+                    Download credentials (.json)
+                </button>
+                <button type="button" class="ghost" id="goToLoginBtn">
+                    Go to login
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="scripts/setup-handler.js"></script>
 </body>
 </html>
