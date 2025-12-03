@@ -8,23 +8,19 @@ IS = Information Security
 SentinelIS
 ├─ backend/
 │   ├─ main/
-│   │   ├─ java/
-│   │   │   ├─ .env
-│   │   │   ├─ ConnectDB.java
-│   │   │   └─ TestConnectDB.java
-│   │   ├─ node/
-│   │   │   ├─ graphql/
-│   │   │   │   └─ scheme.graphql
-│   │   │   ├─ .env
-│   │   │   ├─ logger.js
-│   │   │   ├─ server3000.js
-│   │   │   └─ server4000.js
-│   │   └─ python/
+│   │   └─ node/
+│   │       ├─ graphql/
+│   │       │   └─ scheme.graphql
 │   │       ├─ .env
-│   │       ├─ TestConnectGather.py
-│   │       ├─ TestConnectMongoDB.py
-│   │       └─ TestListCollections.py
-│   └─ pom.xml
+│   │       ├─ logger.js
+│   │       ├─ server3000.js
+│   │       └─ server4000.js
+│   ├─ testing/
+│   │   ├─ .env
+│   │   ├─ TestConnectGather.py
+│   │   ├─ TestConnectMongoDB.py
+│   │   └─ TestListCollections.py
+│   └─ openapi.yaml
 │
 ├─ database/
 │   ├─ asset-mgmt/
@@ -108,8 +104,7 @@ SentinelIS
 - npm (Package Manager)
 
 ### Testing
-- Java (Test Connection to MySQL)
-- Python (Test Connection to MongoDB)
+- Python (Test Connection for Databases)
 
 ## In Planing; not used yet
 - Redis

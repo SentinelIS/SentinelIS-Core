@@ -1,0 +1,6 @@
+# This will be the yaml file for the OpenAPI specification of the backend API
+
+# GET  /api/test        - test database connection
+# POST /api/login       - user login
+# POST /api/setup       - initial setup for a new company
+# POST /api/users       - create a new user for an existing company

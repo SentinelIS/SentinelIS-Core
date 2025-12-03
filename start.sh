@@ -19,10 +19,6 @@ docker-compose up -d
 cd .. || exit 1
 cd backend || exit 1
 
-# Compile and run Java program
-mvn clean compile
-mvn exec:java "-Dexec.mainClass=TestConnectDB"
-
 cd main || exit 1
 cd node || exit 1
 
