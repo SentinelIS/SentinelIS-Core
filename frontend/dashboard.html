@@ -4,22 +4,59 @@
     <!--Link for Remix Icons-->
     <link href="https://unpkg.com/remixicon/fonts/remixicon.css" rel="stylesheet">
 
+    <link rel="stylesheet" href="styles/dashboard.css">
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
 </head>
 <body>
-    <nav>
+    <nav class="topbar">
+        <div class="searchbar">
+            <input type="text" placeholder="Search...">
+            <i class="ri-search-line"></i>
+        </div>
         <ul>
             <li><a href="profile.html">Profile</a></li>
+            <li><a href=""><i class="ri-message-2-fill"></i> Chat</a></li>
+            <li><a href=""><i class="ri-notification-3-fill"></i> Notifications</a></li>
             <li><a href="settings.html"><i class="ri-settings-5-fill"></i> Setting</a></li>
+            <li><a href="http://localhost:3000/login.html"><i class="ri-logout-box-r-fill"></i> Logout</a></li>
         </ul>
     </nav>
+
+    <nav class="sidenav">
+        <ul>
+            <li><a href="dashboard.html"><i class="ri-dashboard-fill"></i> Dashboard</a></li>
+            <li><a href="asset-management.html"><i class="ri-folder-2-fill"></i> Asset-Management</a></li>
+            <li><a href="risk-assessment.html"><i class="ri-shield-fill"></i> Risk Assessment</a></li>
+            <li><a href="policies.html"><i class="ri-file-list-3-fill"></i> Policies</a></li>
+            <li><a href="compliance-audit.html"><i class="ri-checkbox-multiple-fill"></i> Compliance & Audit</a></li>
+            <li><a href="incident-management.html"><i class="ri-alert-fill"></i> Incident-Management</a></li>
+        </ul>
+    </nav>
+
     <main>
         <h1>Welcome, <span id="username">User</span></h1>
         <button onclick="window.location.href='http://localhost:3000/adduser.html'">
             <i class="ri-user-add-fill"></i> Add user
         </button>
+
+        <h2>Asset-Management</h2>
+        <button><i class="ri-add-fill"></i> Add new asset</button>
+
+        <h2>Risk Assessment</h2>
+        <button><i class="ri-add-fill"></i> Add new risk</button>
+
+        <h2>Policies</h2>
+        <button><i class="ri-add-fill"></i> Add new policy</button>
+
+        <h2>Compliance & Audit</h2>
+        <button><i class="ri-add-fill"></i> Add new audit</button>
+
+        <h2>Incident-Management</h2>
+        <button><i class="ri-add-fill"></i> Report new incident</button>
+
     </main>
 
     <script>

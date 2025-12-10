@@ -1,0 +1,27 @@
+.searchbar {
+    position: relative;
+    width: 250px; 
+}
+
+.searchbar input {
+    width: 100%;
+    padding: 8px 30px 8px 10px;
+    box-sizing: border-box;
+}
+
+.searchbar i {
+    position: absolute;
+    right: 10px; 
+    top: 50%; 
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #888; 
+}
+nav.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #74aee9; 
+    border-bottom: 1px solid #ddd; 
+}
