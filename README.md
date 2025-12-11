@@ -4,6 +4,35 @@
 ```yaml
 SentinelIS
 ├─ backend/
+│   ├─ LiveChatApp/
+│   │   ├─ bin/
+│   │   ├─ Hubs/
+│   │   │   └─ ChatHub.cs
+│   │   ├─ obj/
+│   │   ├─ Pages/
+│   │   │   ├─ Shared
+│   │   │   │   ├─ _Layout.cshtml
+│   │   │   │   └─ _Layout.cshtml.css
+│   │   │   ├─ _ViewImports.cshtml
+│   │   │   ├─ _ViewStart.cshtml
+│   │   │   ├─ Error.cshtml
+│   │   │   ├─ Error.cshtml.cs
+│   │   │   ├─ Index.cshtml
+│   │   │   ├─ Index.cshtml.cs
+│   │   │   ├─ Privacy.cshtml
+│   │   │   └─ Privacy.cshtml.cs
+│   │   ├─ Properties/
+│   │   │   └─ launchSettings.json
+│   │   ├─ wwwroot/
+│   │   │   ├─ css
+│   │   │   │   └─ site.css
+│   │   │   ├─ js
+│   │   │   │   └─ site.js
+│   │   │   └─ favicon.ico
+│   │   ├─ appsettings.Developements.json
+│   │   ├─ appsettings.json
+│   │   ├─ LiveChatApp.csproj
+│   │   └─ Programm.cs
 │   ├─ main/
 │   │   ├─ node/
 │   │   │   ├─ graphql/
@@ -84,7 +113,8 @@ SentinelIS
 ├─ package.json
 ├─ preload.js
 ├─ README.md
-└─ start.sh
+├─ start.sh
+└─ Test.sln
 ```
 
 ## Start
@@ -101,17 +131,17 @@ docker-compose down
 ```
 
 ### Node Server
-```
+```cmd
 node server3000.js
 ```
 
 ### Electron GUI
-```
+```cmd
 npm start
 ```
 
 ### .NET Livechat
-```
+```cmd
 dotnet clean
 
 dotnet run
