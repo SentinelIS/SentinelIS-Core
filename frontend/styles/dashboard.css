@@ -1,3 +1,129 @@
+:root{
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --primary: #2563eb;     
+    --navy: #0f172a;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --success: #10b981;
+    --radius: 10px;
+    --gap: 16px;
+    --shadow: 0 6px 24px rgba(2,6,23,0.08);
+}
+
+*{
+    box-sizing:border-box;
+}
+
+html,body{
+    height:100%;
+    margin:0;
+    font-family: 'Inter', "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(180deg, var(--bg) 0%, #f1f5f9 100%);
+    color:var(--navy);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+}
+
+body {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+        "sidenav topbar"
+        "sidenav main";
+    height: 100vh;
+}
+
+.topbar {
+    grid-area: topbar;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: var(--card); 
+    border-bottom: 1px solid var(--border);
+}
+
+.sidenav {
+    grid-area: sidenav;
+    background-color: var(--card);
+    border-right: 1px solid var(--border);
+    padding: 20px;
+}
+
+.sidenav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sidenav ul li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    color: var(--muted);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.sidenav ul li a:hover,
+.sidenav ul li a.active {
+    background-color: #f1f5f9;
+    color: var(--primary);
+}
+
+.sidenav ul li a i {
+    font-size: 20px;
+}
+
+main {
+    grid-area: main;
+    padding: 30px;
+    overflow-y: auto;
+}
+
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.main-header h1 {
+    font-size: 28px;
+    margin: 0;
+}
+
+.dashboard-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.dashboard-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border);
+}
+
+.dashboard-section h2 {
+    font-size: 20px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
 .searchbar {
     position: relative;
     width: 250px; 
@@ -7,6 +133,8 @@
     width: 100%;
     padding: 8px 30px 8px 10px;
     box-sizing: border-box;
+    border-radius: 8px;
+    border: 1px solid var(--border);
 }
 
 .searchbar i {
@@ -15,13 +143,63 @@
     top: 50%; 
     transform: translateY(-50%);
     pointer-events: none;
-    color: #888; 
+    color: var(--muted); 
 }
-nav.topbar {
+
+.topbar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
-    background-color: #74aee9; 
-    border-bottom: 1px solid #ddd; 
+    gap: 15px;
+}
+
+.topbar ul li a {
+    color: var(--muted);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px;
+    border-radius: 6px;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.topbar ul li a:hover {
+    color: var(--primary);
+    background-color: #f1f5f9;
+}
+
+.topbar ul li a i {
+    font-size: 20px;
+}
+
+button{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding: 10px 16px;
+    background: linear-gradient(180deg, var(--primary), #1e40af);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+    box-shadow: 0 4px 14px rgba(37,99,235,0.12);
+    transition:transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+
+button:hover{
+    transform:translateY(-2px);
+    filter:brightness(1.03);
+    box-shadow: 0 8px 22px rgba(37,99,235,0.16);
+}
+
+button:active{ 
+    transform:translateY(0);
 }

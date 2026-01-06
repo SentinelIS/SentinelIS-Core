@@ -27,36 +27,45 @@
 
     <nav class="sidenav">
         <ul>
-            <li><a href="dashboard.html"><i class="ri-dashboard-fill"></i> Dashboard</a></li>
-            <li><a href="asset-management.html"><i class="ri-folder-2-fill"></i> Asset-Management</a></li>
-            <li><a href="risk-assessment.html"><i class="ri-shield-fill"></i> Risk Assessment</a></li>
-            <li><a href="policies.html"><i class="ri-file-list-3-fill"></i> Policies</a></li>
-            <li><a href="compliance-audit.html"><i class="ri-checkbox-multiple-fill"></i> Compliance & Audit</a></li>
-            <li><a href="incident-management.html"><i class="ri-alert-fill"></i> Incident-Management</a></li>
+            <li><a href="#dashboard-header"><i class="ri-dashboard-fill"></i> Dashboard</a></li>
+            <li><a href="#asset-management-h2"><i class="ri-folder-2-fill"></i> Asset-Management</a></li>
+            <li><a href="#risk-assessment-h2"><i class="ri-shield-fill"></i> Risk Assessment</a></li>
+            <li><a href="#policies-h2"><i class="ri-file-list-3-fill"></i> Policies</a></li>
+            <li><a href="#compliance-audit-h2"><i class="ri-checkbox-multiple-fill"></i> Compliance & Audit</a></li>
+            <li><a href="#incident-management-h2"><i class="ri-alert-fill"></i> Incident-Management</a></li>
         </ul>
     </nav>
 
     <main>
-        <h1>Welcome, <span id="username">User</span></h1>
-        <button onclick="window.location.href='http://localhost:3000/adduser.html'">
-            <i class="ri-user-add-fill"></i> Add user
-        </button>
+        <div id="dashboard-header" class="main-header">
+            <h1>Welcome, <span id="username">User</span></h1>
+            <button onclick="window.location.href='http://localhost:3000/adduser.html'">
+                <i class="ri-user-add-fill"></i> Add user
+            </button>
+        </div>
 
-        <h2>Asset-Management</h2>
-        <button><i class="ri-add-fill"></i> Add new asset</button>
-
-        <h2>Risk Assessment</h2>
-        <button><i class="ri-add-fill"></i> Add new risk</button>
-
-        <h2>Policies</h2>
-        <button><i class="ri-add-fill"></i> Add new policy</button>
-
-        <h2>Compliance & Audit</h2>
-        <button><i class="ri-add-fill"></i> Add new audit</button>
-
-        <h2>Incident-Management</h2>
-        <button><i class="ri-add-fill"></i> Report new incident</button>
-
+        <div class="dashboard-sections">
+            <div class="dashboard-section">
+                <h2 id="asset-management-h2"><i class="ri-folder-2-fill"></i> Asset-Management</h2>
+                <button><i class="ri-add-fill"></i> Add new asset</button>
+            </div>
+            <div class="dashboard-section">
+                <h2 id="risk-assessment-h2"><i class="ri-shield-fill"></i> Risk Assessment</h2>
+                <button><i class="ri-add-fill"></i> Add new risk</button>
+            </div>
+            <div class="dashboard-section">
+                <h2 id="policies-h2"><i class="ri-file-list-3-fill"></i> Policies</h2>
+                <button><i class="ri-add-fill"></i> Add new policy</button>
+            </div>
+            <div class="dashboard-section">
+                <h2 id="compliance-audit-h2"><i class="ri-checkbox-multiple-fill"></i> Compliance & Audit</h2>
+                <button><i class="ri-add-fill"></i> Add new audit</button>
+            </div>
+            <div class="dashboard-section">
+                <h2 id="incident-management-h2"><i class="ri-alert-fill"></i> Incident-Management</h2>
+                <button><i class="ri-add-fill"></i> Report new incident</button>
+            </div>
+        </div>
     </main>
 
     <script>
