@@ -23,8 +23,7 @@ cd main || exit 1
 cd node || exit 1
 
 # Run Node.js servers
-node server3000.js
-node server4000.js
+node server3000.js & node server4000.js & node server5000.js
 
 cd ../../.. || exit 1
 
