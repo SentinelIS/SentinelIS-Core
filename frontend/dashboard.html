@@ -169,6 +169,61 @@
                     }
                 });
             }
+
+            const addAssetForm = document.getElementById('add-asset-form');
+            if (addAssetForm) {
+                addAssetForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    const formData = new FormData(addAssetForm);
+                    const assetData = Object.fromEntries(formData.entries());
+
+                    const companyId = localStorage.getItem('companyId');
+                    const username = localStorage.getItem('username');
+
+                    if (!companyId || !username) {
+                        alert('Could not find user and company information. Please log in again.');
+                        return;
+                    }
+                    
+                    const payload = {
+                        name: assetData['asset-name'],
+                        type: assetData['asset-type'],
+                        description: assetData['asset-description'],
+                        classification: assetData['asset-classification'],
+                        location: assetData['asset-location'],
+                        owner: assetData['asset-owner'],
+                        value: assetData['asset-value'],
+                        status: assetData['asset-status'],
+                        username: username,
+                        companyId: parseInt(companyId, 10)
+                    };
+
+                    try {
+                        const response = await fetch('http://localhost:5000/api/assets', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(payload)
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok && result.success) {
+                            alert('Asset created successfully!');
+                            addAssetModal.classList.add('modal-hidden');
+                            addAssetForm.reset();
+                            // Optionally, refresh the asset list or update the UI
+                        } else {
+                            alert(`Error: ${result.message}`);
+                        }
+                    } catch (error) {
+                        console.error('Failed to create asset:', error);
+                        alert('An error occurred while creating the asset. Please try again.');
+                    }
+                });
+            }
         });
     </script>
 </body>
