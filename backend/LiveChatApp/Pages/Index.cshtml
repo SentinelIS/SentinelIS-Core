@@ -4,23 +4,26 @@
     ViewData["Title"] = "Live Chat";
 }
 
-<h1>Live Chat mit SignalR</h1>
+<div class="chat-container">
+    <div class="chat-header">
+        <h1>Live Chat</h1>
+        <div class="form-group">
+            <label for="userInput">Benutzername:</label>
+            <input type="text" id="userInput" class="form-control" placeholder="Dein Name" />
+        </div>
+    </div>
 
-<div>
-    <label>Benutzername:</label>
-    <input id="userInput" placeholder="Dein Name" />
+    <ul id="messagesList" class="chat-messages"></ul>
+
+    <div class="chat-input-form">
+        <div class="input-group">
+            <input type="text" id="messageInput" class="form-control" placeholder="Schreibe etwas..." />
+            <div class="input-group-append">
+                <button id="sendButton" class="btn btn-primary">Senden</button>
+            </div>
+        </div>
+    </div>
 </div>
-
-<div style="margin-top:10px;">
-    <label>Nachricht:</label>
-    <input id="messageInput" placeholder="Schreibe etwas..." style="width:60%;" />
-    <button id="sendButton">Senden</button>
-</div>
-
-<hr />
-
-<ul id="messagesList">
-</ul>
 
 <!-- SignalR Client -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
@@ -31,13 +34,32 @@
         .withAutomaticReconnect()
         .build();
 
+    let currentUser = "Anonym";
+
     connection.on("ReceiveMessage", function (user, message) {
         const li = document.createElement("li");
+        li.classList.add("message");
+
+        const messageUser = document.getElementById("userInput").value || "Anonym";
+
+        if (user === messageUser) {
+            li.classList.add("sent");
+        } else {
+            li.classList.add("received");
+        }
+
         const strong = document.createElement("strong");
-        strong.textContent = user + ": ";
+        strong.textContent = user;
+        
+        const messageText = document.createElement("p");
+        messageText.textContent = message;
+
         li.appendChild(strong);
-        li.appendChild(document.createTextNode(message));
-        document.getElementById("messagesList").appendChild(li);
+        li.appendChild(messageText);
+
+        const messagesList = document.getElementById("messagesList");
+        messagesList.appendChild(li);
+        messagesList.scrollTop = messagesList.scrollHeight;
     });
 
     async function start() {
@@ -52,6 +74,7 @@
 
     document.getElementById("sendButton").addEventListener("click", async function () {
         const user = document.getElementById("userInput").value || "Anonym";
+        currentUser = user;
         const message = document.getElementById("messageInput").value;
 
         if (!message) return;
