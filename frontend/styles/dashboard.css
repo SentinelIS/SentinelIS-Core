@@ -203,3 +203,157 @@ button:hover{
 button:active{ 
     transform:translateY(0);
 }
+
+/* Modal Styles */
+.modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(15,23,42,0.55);
+    backdrop-filter:blur(4px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+    z-index:50;
+    opacity:1;
+    transition:opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.modal-overlay.modal-hidden{
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+}
+
+.modal{
+    width:100%;
+    max-width:600px;
+    background:var(--card);
+    border-radius:var(--radius);
+    box-shadow:0 18px 60px rgba(15,23,42,0.35);
+    border:1px solid var(--border);
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+    transform:scale(1);
+    transition:transform 0.2s ease;
+}
+
+.modal-overlay.modal-hidden .modal{
+    transform:scale(0.95);
+}
+
+.modal-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding: 18px 22px 0;
+}
+
+.modal-header h2{
+    margin:0;
+    font-size:20px;
+    display:flex;
+    align-items:center;
+    gap: 10px;
+}
+
+.modal-close{
+    width:auto;
+    padding:6px;
+    border-radius:999px;
+    background:transparent;
+    color:var(--muted);
+    border:none;
+    box-shadow:none;
+    cursor:pointer;
+    transition:background .15s ease, color .15s ease;
+}
+
+.modal-close i{
+    font-size:18px;
+}
+
+.modal-close:hover{
+    border:none;
+    color:var(--navy);
+    background:rgba(148,163,184,0.18);
+}
+
+.modal-body{
+    padding: 0 22px 18px;
+}
+
+#add-asset-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.field{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+
+.field.two-col{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+#add-asset-form label {
+    font-size:12px;
+    font-weight:600;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:0.6px;
+}
+
+#add-asset-form input,
+#add-asset-form select,
+#add-asset-form textarea {
+    width:100%;
+    padding:12px 14px;
+    font-size:14px;
+    border:1px solid var(--border);
+    border-radius:8px;
+    background: #ffffff;
+    color:var(--navy);
+    outline:none;
+    transition:box-shadow .18s ease, border-color .18s ease, transform .08s ease;
+    -webkit-appearance:none;
+    -moz-appearance:none;
+    appearance:none;
+}
+
+#add-asset-form input:focus,
+#add-asset-form select:focus,
+#add-asset-form textarea:focus {
+    border-color:var(--primary);
+    box-shadow:0 4px 18px rgba(37,99,235,0.08), 0 0 0 4px rgba(37,99,235,0.06);
+    transform:translateY(-1px);
+}
+
+#add-asset-form select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+}
+
+#add-asset-form textarea {
+    resize: vertical;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.primary-btn {
+    width: 100%;
+}

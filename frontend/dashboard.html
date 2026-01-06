@@ -47,7 +47,7 @@
         <div class="dashboard-sections">
             <div class="dashboard-section">
                 <h2 id="asset-management-h2"><i class="ri-folder-2-fill"></i> Asset-Management</h2>
-                <button><i class="ri-add-fill"></i> Add new asset</button>
+                <button id="add-asset-btn"><i class="ri-add-fill"></i> Add new asset</button>
             </div>
             <div class="dashboard-section">
                 <h2 id="risk-assessment-h2"><i class="ri-shield-fill"></i> Risk Assessment</h2>
@@ -68,12 +68,107 @@
         </div>
     </main>
 
+    <div id="add-asset-modal" class="modal-overlay modal-hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h2><i class="ri-add-fill"></i> Add New Asset</h2>
+                <button id="add-asset-modal-close" class="modal-close"><i class="ri-close-line"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="add-asset-form">
+                    <div class="field">
+                        <label for="asset-name">Asset Name</label>
+                        <input type="text" id="asset-name" name="asset-name" required>
+                    </div>
+                    <div class="field">
+                        <label for="asset-type">Asset Type</label>
+                        <select id="asset-type" name="asset-type" required>
+                            <option value="Server">Server</option>
+                            <option value="Application">Application</option>
+                            <option value="Device">Device</option>
+                            <option value="Database">Database</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="asset-description">Description</label>
+                        <textarea id="asset-description" name="asset-description" rows="3"></textarea>
+                    </div>
+                    <div class="field two-col">
+                        <div class="field">
+                            <label for="asset-classification">Classification</label>
+                            <select id="asset-classification" name="asset-classification">
+                                <option value="public">Public</option>
+                                <option value="internal">Internal</option>
+                                <option value="top secret">Top Secret</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="asset-location">Location</label>
+                            <input type="text" id="asset-location" name="asset-location">
+                        </div>
+                    </div>
+                    <div class="field two-col">
+                        <div class="field">
+                            <label for="asset-owner">Owner</label>
+                            <input type="text" id="asset-owner" name="asset-owner">
+                        </div>
+                        <div class="field">
+                            <label for="asset-value">Value</label>
+                            <select id="asset-value" name="asset-value">
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                                <option value="critical">Critical</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="asset-status">Status</label>
+                         <select id="asset-status" name="asset-status">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="in planning">In Planning</option>
+                            <option value="decommissioned">Decommissioned</option>
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="primary-btn">Save Asset</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
         // show username saved by login-handler.js (localStorage)
         document.addEventListener('DOMContentLoaded', () => {
             const name = localStorage.getItem('username') || 'User';
             const el = document.getElementById('username');
             if (el) el.textContent = name;
+
+            const addAssetModal = document.getElementById('add-asset-modal');
+            const addAssetBtn = document.getElementById('add-asset-btn');
+            const closeModalBtn = document.getElementById('add-asset-modal-close');
+
+            if (addAssetBtn) {
+                addAssetBtn.addEventListener('click', () => {
+                    addAssetModal.classList.remove('modal-hidden');
+                });
+            }
+
+            if (closeModalBtn) {
+                closeModalBtn.addEventListener('click', () => {
+                    addAssetModal.classList.add('modal-hidden');
+                });
+            }
+
+            if (addAssetModal) {
+                addAssetModal.addEventListener('click', (e) => {
+                    if (e.target === addAssetModal) {
+                        addAssetModal.classList.add('modal-hidden');
+                    }
+                });
+            }
         });
     </script>
 </body>
