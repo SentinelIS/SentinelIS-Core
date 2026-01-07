@@ -10,6 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
 </head>
+<script src="scripts/dashboard-handler.js" defer></script>
 <body>
     <nav class="topbar">
         <div class="searchbar">
@@ -49,6 +50,44 @@
                 <div class="dashboard-section-header">
                     <h2 id="asset-management-h2"><i class="ri-folder-2-fill"></i> Asset-Management</h2>
                     <button id="add-asset-btn"><i class="ri-add-fill"></i> Add new asset</button>
+                </div>
+                <div id="asset-filter-sort-bar">
+                    <div class="filter-group">
+                        <input type="text" id="filter-keyword" placeholder="Filter by keyword...">
+                    </div>
+                    <div class="filter-group">
+                        <select id="filter-type">
+                            <option value="">All Types</option>
+                            <option value="Server">Server</option>
+                            <option value="Application">Application</option>
+                            <option value="Device">Device</option>
+                            <option value="Database">Database</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <select id="filter-status">
+                            <option value="">All Statuses</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="in planning">In Planning</option>
+                            <option value="decommissioned">Decommissioned</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <select id="sort-by">
+                            <option value="asset_id-asc">Sort by ID (Asc)</option>
+                            <option value="asset_id-desc">Sort by ID (Desc)</option>
+                            <option value="name-asc">Sort by Name (A-Z)</option>
+                            <option value="name-desc">Sort by Name (Z-A)</option>
+                            <option value="type-asc">Sort by Type (A-Z)</option>
+                            <option value="type-desc">Sort by Type (Z-A)</option>
+                            <option value="value-asc">Sort by Value (Low to High)</option>
+                            <option value="value-desc">Sort by Value (High to Low)</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <button id="reset-filters-btn">Reset</button>
+                    </div>
                 </div>
                 <div id="asset-list"></div>
             </div>
@@ -224,341 +263,5 @@
         </div>
     </div>
 
-    <script>
-        // show username saved by login-handler.js (localStorage)
-        document.addEventListener('DOMContentLoaded', () => {
-            const name = localStorage.getItem('username') || 'User';
-            const el = document.getElementById('username');
-            if (el) el.textContent = name;
-
-            const addAssetModal = document.getElementById('add-asset-modal');
-            const addAssetBtn = document.getElementById('add-asset-btn');
-            const closeModalBtn = document.getElementById('add-asset-modal-close');
-
-            if (addAssetBtn) {
-                addAssetBtn.addEventListener('click', () => {
-                    addAssetModal.classList.remove('modal-hidden');
-                });
-            }
-
-            if (closeModalBtn) {
-                closeModalBtn.addEventListener('click', () => {
-                    addAssetModal.classList.add('modal-hidden');
-                });
-            }
-
-            if (addAssetModal) {
-                addAssetModal.addEventListener('click', (e) => {
-                    if (e.target === addAssetModal) {
-                        addAssetModal.classList.add('modal-hidden');
-                    }
-                });
-            }
-
-            const addAssetForm = document.getElementById('add-asset-form');
-            const editAssetModal = document.getElementById('edit-asset-modal');
-            const editAssetClose = document.getElementById('edit-asset-modal-close');
-            const editAssetForm = document.getElementById('edit-asset-form');
-            const editButton = document.getElementById('edit-asset-btn');
-            const saveButton = document.getElementById('save-asset-btn');
-            const deleteButton = document.getElementById('delete-asset-btn');
-
-            // Load assets when the page is ready
-            loadAssets();
-
-            if (addAssetForm) {
-                addAssetForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-
-                    const formData = new FormData(addAssetForm);
-                    const assetData = Object.fromEntries(formData.entries());
-
-                    const companyId = localStorage.getItem('companyId');
-                    const username = localStorage.getItem('username');
-
-                    if (!companyId || !username) {
-                        alert('Could not find user and company information. Please log in again.');
-                        return;
-                    }
-                    
-                    const payload = {
-                        name: assetData['asset-name'],
-                        type: assetData['asset-type'],
-                        description: assetData['asset-description'],
-                        classification: assetData['asset-classification'],
-                        location: assetData['asset-location'],
-                        owner: assetData['asset-owner'],
-                        value: assetData['asset-value'],
-                        status: assetData['asset-status'],
-                        username: username,
-                        companyId: parseInt(companyId, 10)
-                    };
-
-                    try {
-                        const response = await fetch('http://localhost:5000/api/assets', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify(payload)
-                        });
-
-                        const result = await response.json();
-
-                        if (response.ok && result.success) {
-                            alert('Asset created successfully!');
-                            addAssetModal.classList.add('modal-hidden');
-                            addAssetForm.reset();
-                            loadAssets(); // Refresh the asset list
-                        } else {
-                            alert(`Error: ${result.message}`);
-                        }
-                    } catch (error) {
-                        console.error('Failed to create asset:', error);
-                        alert('An error occurred while creating the asset. Please try again.');
-                    }
-                });
-            }
-
-            if (editAssetClose && editAssetModal) {
-                editAssetClose.addEventListener('click', () => {
-                    closeEditModal();
-                });
-                editAssetModal.addEventListener('click', (e) => {
-                    if (e.target === editAssetModal) closeEditModal();
-                });
-            }
-
-            if (editButton && editAssetForm && saveButton) {
-                editButton.addEventListener('click', () => {
-                    setEditMode(false); // turn off readonly
-                });
-            }
-
-            if (editAssetForm && saveButton) {
-                editAssetForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const assetId = document.getElementById('edit-asset-id').value;
-                    if (!assetId) return;
-
-                    const payload = {
-                        name: document.getElementById('edit-asset-name').value,
-                        type: document.getElementById('edit-asset-type').value,
-                        description: document.getElementById('edit-asset-description').value,
-                        classification: document.getElementById('edit-asset-classification').value,
-                        location: document.getElementById('edit-asset-location').value,
-                        owner: document.getElementById('edit-asset-owner').value,
-                        value: document.getElementById('edit-asset-value').value,
-                        status: document.getElementById('edit-asset-status').value
-                    };
-
-                    try {
-                        const response = await fetch(`http://localhost:5000/api/assets/${assetId}`, {
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(payload)
-                        });
-                        const result = await response.json();
-                        if (!response.ok || !result.success) {
-                            throw new Error(result.message || 'Failed to update asset');
-                        }
-                        console.log('Asset updated successfully');
-                        setEditMode(true); // back to readonly
-                        closeEditModal();
-                        loadAssets();
-                    } catch (error) {
-                        console.error('Failed to update asset:', error);
-                        console.error(`Error updating asset: ${error.message}`);
-                    }
-                });
-            }
-
-            if (deleteButton) {
-                deleteButton.addEventListener('click', async () => {
-                    const assetId = document.getElementById('edit-asset-id').value;
-                    if (!assetId) return;
-                    const confirmDelete = confirm('Delete this asset from MySQL and MongoDB?');
-                    if (!confirmDelete) return;
-                    try {
-                        const response = await fetch(`http://localhost:5000/api/assets/${assetId}`, {
-                            method: 'DELETE'
-                        });
-                        const result = await response.json();
-                        if (!response.ok || !result.success) {
-                            throw new Error(result.message || 'Failed to delete asset');
-                        }
-                        console.log('Asset deleted');
-                        closeEditModal();
-                        loadAssets();
-                    } catch (error) {
-                        console.error('Failed to delete asset:', error);
-                        alert(`Error deleting asset: ${error.message}`);
-                    }
-                });
-            }
-        });
-
-        async function loadAssets() {
-            const assetList = document.getElementById('asset-list');
-            if (!assetList) return;
-
-            const companyId = localStorage.getItem('companyId');
-            if (!companyId) {
-                assetList.innerHTML = '<p>Could not determine company. Please log in again.</p>';
-                return;
-            }
-
-            assetList.innerHTML = '<p>Loading assets...</p>'; // Show a loading message
-
-            const query = `
-                query GetAssets($compId: Int!) {
-                    assets(comp_id: $compId) {
-                        asset_id
-                        mongo {
-                            name
-                            type
-                            description
-                            classification
-                            location
-                            owner
-                            value
-                            status
-                        }
-                    }
-                }
-            `;
-
-            const variables = {
-                compId: parseInt(companyId, 10)
-            };
-
-            try {
-                const response = await fetch('http://localhost:4000', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ 
-                        query,
-                        variables 
-                    })
-                });
-
-                const json = await response.json();
-
-                if(json.errors) {
-                    throw new Error(json.errors.map(e => e.message).join('\n'));
-                }
-
-                const assets = json.data.assets;
-
-                assetList.innerHTML = ''; // Clear the list
-
-                if (assets && assets.length > 0) {
-                    const table = document.createElement('table');
-                    table.innerHTML = `
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Type</th>
-                                <th>Description</th>
-                                <th>Classification</th>
-                                <th>Location</th>
-                                <th>Owner</th>
-                                <th>Value</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    `;
-                    const tbody = table.querySelector('tbody');
-                    assets.forEach(asset => {
-                        if (asset.mongo) {
-                            const row = document.createElement('tr');
-                            row.dataset.assetId = asset.asset_id;
-                            row.innerHTML = `
-                                <td>${asset.asset_id}</td>
-                                <td class="asset-link" data-asset-id="${asset.asset_id}">${asset.mongo.name || ''}</td>
-                                <td>${asset.mongo.type || ''}</td>
-                                <td>${asset.mongo.description || ''}</td>
-                                <td>${asset.mongo.classification || ''}</td>
-                                <td>${asset.mongo.location || ''}</td>
-                                <td>${asset.mongo.owner || ''}</td>
-                                <td>${asset.mongo.value || ''}</td>
-                                <td>${asset.mongo.status || ''}</td>
-                            `;
-                            tbody.appendChild(row);
-                        }
-                    });
-                    // Click handler on asset name to open overlay
-                    table.addEventListener('click', async (e) => {
-                        const target = e.target;
-                        if (target && target.classList.contains('asset-link')) {
-                            const assetId = target.dataset.assetId;
-                            if (assetId) {
-                                await openEditModal(assetId);
-                            }
-                        }
-                    });
-                    assetList.appendChild(table);
-                } else {
-                    assetList.innerHTML = '<p>No assets found for your company.</p>';
-                }
-            } catch (error) {
-                console.error('Failed to fetch assets:', error);
-                assetList.innerHTML = `<p>Error loading assets: ${error.message}</p>`;
-            }
-        }
-
-        function setEditMode(readonly = true) {
-            const form = document.getElementById('edit-asset-form');
-            const saveButton = document.getElementById('save-asset-btn');
-            const editButton = document.getElementById('edit-asset-btn');
-            if (!form || !saveButton || !editButton) return;
-            if (readonly) {
-                form.classList.add('readonly-mode');
-                saveButton.style.display = 'none';
-                editButton.style.display = 'inline-flex';
-            } else {
-                form.classList.remove('readonly-mode');
-                saveButton.style.display = 'inline-flex';
-                editButton.style.display = 'none';
-            }
-        }
-
-        function closeEditModal() {
-            const modal = document.getElementById('edit-asset-modal');
-            if (modal) modal.classList.add('modal-hidden');
-            setEditMode(true);
-        }
-
-        async function openEditModal(assetId) {
-            try {
-                const response = await fetch(`http://localhost:5000/api/assets/${assetId}`);
-                const result = await response.json();
-                if (!response.ok || !result.success) {
-                    throw new Error(result.message || 'Failed to load asset');
-                }
-                const asset = result.asset;
-                document.getElementById('edit-asset-id').value = asset.asset_id;
-                document.getElementById('edit-asset-name').value = asset.name || '';
-                document.getElementById('edit-asset-type').value = asset.type || 'Server';
-                document.getElementById('edit-asset-description').value = asset.description || '';
-                document.getElementById('edit-asset-classification').value = asset.classification || 'public';
-                document.getElementById('edit-asset-location').value = asset.location || '';
-                document.getElementById('edit-asset-owner').value = asset.owner || '';
-                document.getElementById('edit-asset-value').value = asset.value || 'low';
-                document.getElementById('edit-asset-status').value = asset.status || 'active';
-                setEditMode(true);
-                const modal = document.getElementById('edit-asset-modal');
-                if (modal) modal.classList.remove('modal-hidden');
-            } catch (error) {
-                console.error('Failed to open asset modal:', error);
-                alert(`Could not load asset: ${error.message}`);
-            }
-        }
-    </script>
 </body>
 </html>

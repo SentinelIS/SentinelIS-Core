@@ -447,3 +447,32 @@ button:active{
     background: #dc2626;
 }
 
+#asset-filter-sort-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    align-items: center;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-group input,
+.filter-group select {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    background-color: var(--card);
+}
+
+#reset-filters-btn {
+    padding: 8px 16px;
+    background: var(--muted);
+}
+
+#reset-filters-btn:hover {
+    background: var(--navy);
+}
