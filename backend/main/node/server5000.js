@@ -14,6 +14,7 @@ API Endpoints:
 const express = require('express');
 const mysql = require('mysql2/promise');
 const { MongoClient } = require('mongodb');
+const { createClient } = require('redis');
 const path = require('path');
 require('dotenv').config(); 
 
@@ -24,6 +25,12 @@ const PORT = 5000;
 
 let mysqlPool;
 let mongoDB;
+let redisClient;
+let redisEnabled = false;
+
+// Cache configuration
+const CACHE_TTL = 3600; // 1 hour in seconds
+const CACHE_KEY_PREFIX = 'asset:';
 
 (async () => {
     try {
@@ -53,9 +60,53 @@ let mongoDB;
         console.log(`[INIT] ✓ MongoDB connected successfully`);
         console.log(`[INIT] ✓ Using database: ${process.env.MONGO_INITDB_DATABASE}`);
 
+        // Redis Connection
+        console.log("[INIT] Creating Redis client...");
+        const redisUrl = process.env.REDIS_URL || `redis://${process.env.REDIS_HOST || 'localhost'}:${process.env.REDIS_PORT || 6379}`;
+        redisClient = createClient({
+            url: redisUrl,
+            password: process.env.REDIS_PASSWORD || undefined,
+            socket: {
+                reconnectStrategy: (retries) => {
+                    if (retries > 10) {
+                        console.log('[REDIS] Max reconnection attempts reached. Cache disabled.');
+                        redisEnabled = false;
+                        return new Error('Redis connection failed');
+                    }
+                    return Math.min(retries * 100, 3000);
+                }
+            }
+        });
+
+        redisClient.on('error', (err) => {
+            console.error('[REDIS] Redis Client Error:', err);
+            redisEnabled = false;
+        });
+
+        redisClient.on('connect', () => {
+            console.log('[REDIS] Redis client connecting...');
+        });
+
+        redisClient.on('ready', () => {
+            console.log('[REDIS] ✓ Redis client ready');
+            redisEnabled = true;
+        });
+
+        redisClient.on('reconnecting', () => {
+            console.log('[REDIS] Redis client reconnecting...');
+        });
+
+        await redisClient.connect();
+        console.log(`[INIT] ✓ Redis connected successfully`);
+
     } catch (err) {
         console.error("Error during database initialization:", err);
-        process.exit(1);
+        if (err.message && err.message.includes('Redis')) {
+            console.warn('[REDIS] Redis connection failed. Continuing without cache.');
+            redisEnabled = false;
+        } else {
+            process.exit(1);
+        }
     }
 })();
 
@@ -70,6 +121,46 @@ app.use((req, res, next) => {
 });
 
 app.use(express.static(path.join(__dirname, '..', '..', '..', 'frontend')));
+
+// Redis Cache Helper Functions
+async function getCachedAsset(assetId) {
+    if (!redisEnabled || !redisClient) return null;
+    try {
+        const cacheKey = `${CACHE_KEY_PREFIX}${assetId}`;
+        const cached = await redisClient.get(cacheKey);
+        if (cached) {
+            console.log(`[CACHE] Cache HIT for asset ${assetId}`);
+            return JSON.parse(cached);
+        }
+        console.log(`[CACHE] Cache MISS for asset ${assetId}`);
+        return null;
+    } catch (err) {
+        console.error('[CACHE] Error reading from cache:', err);
+        return null;
+    }
+}
+
+async function setCachedAsset(assetId, assetData) {
+    if (!redisEnabled || !redisClient) return;
+    try {
+        const cacheKey = `${CACHE_KEY_PREFIX}${assetId}`;
+        await redisClient.setEx(cacheKey, CACHE_TTL, JSON.stringify(assetData));
+        console.log(`[CACHE] Cached asset ${assetId} for ${CACHE_TTL}s`);
+    } catch (err) {
+        console.error('[CACHE] Error writing to cache:', err);
+    }
+}
+
+async function invalidateAssetCache(assetId) {
+    if (!redisEnabled || !redisClient) return;
+    try {
+        const cacheKey = `${CACHE_KEY_PREFIX}${assetId}`;
+        await redisClient.del(cacheKey);
+        console.log(`[CACHE] Invalidated cache for asset ${assetId}`);
+    } catch (err) {
+        console.error('[CACHE] Error invalidating cache:', err);
+    }
+}
 
 app.post('/api/assets', async (req, res) => {
     console.log("POST /api/assets received with body:", req.body);
@@ -138,6 +229,9 @@ app.post('/api/assets', async (req, res) => {
         await sqlConnection.commit();
         sqlConnection.release();
 
+        // 5. Cache the newly created asset
+        await setCachedAsset(assetId, assetDetails);
+
         res.status(201).json({ success: true, message: 'Asset created successfully', assetId: assetId });
 
     } catch (err) {
@@ -159,10 +253,19 @@ app.get('/api/assets/:id', async (req, res) => {
     }
 
     try {
-        const asset = await mongoDB.collection('assets').findOne({ asset_id: assetId });
+        // Try to get from cache first
+        let asset = await getCachedAsset(assetId);
 
+        // If not in cache, fetch from MongoDB
         if (!asset) {
-            return res.status(404).json({ success: false, message: 'Asset not found' });
+            asset = await mongoDB.collection('assets').findOne({ asset_id: assetId });
+
+            if (!asset) {
+                return res.status(404).json({ success: false, message: 'Asset not found' });
+            }
+
+            // Cache the asset for future requests
+            await setCachedAsset(assetId, asset);
         }
 
         res.json({ success: true, asset });
@@ -213,6 +316,9 @@ app.put('/api/assets/:id', async (req, res) => {
             return res.status(404).json({ success: false, message: 'Asset not found' });
         }
 
+        // Invalidate cache to force refresh on next GET
+        await invalidateAssetCache(assetId);
+
         res.json({ success: true, message: 'Asset updated successfully' });
     } catch (err) {
         console.error('Error updating asset:', err);
@@ -257,6 +363,9 @@ app.delete('/api/assets/:id', async (req, res) => {
 
         await sqlConnection.commit();
         sqlConnection.release();
+
+        // Invalidate cache after deletion
+        await invalidateAssetCache(assetId);
 
         res.json({ success: true, message: 'Asset deleted successfully' });
     } catch (err) {
