@@ -37,3 +37,10 @@ description = "Mimo Chatbot for questions about SentinelIS"
 method = "POST"
 path = "/api/chatbot"
 create_date = "03.12.2025"
+
+[[routes]]
+file = "node/server5000.js"
+description = "Create a new asset"
+method = "POST"
+path = "/api/assets"
+create_date = "05.12.2025"

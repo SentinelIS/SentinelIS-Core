@@ -57,6 +57,15 @@ let mongoDB;
 })();
 
 app.use(express.json());
+
+// CORS Middleware
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+    next();
+});
+
 app.use(express.static(path.join(__dirname, '..', '..', '..', 'frontend')));
 
 app.post('/api/assets', async (req, res) => {
@@ -105,18 +114,18 @@ app.post('/api/assets', async (req, res) => {
             asset_id: assetId,
             name,
             type,
-            description: description || null,
-            classification: classification || null,
-            location: location || null,
-            owner: owner || null,
-            value: value || null,
             status: status || 'active',
             risks: [],
             controls: [],
-            last_audit: null,
             created_at: new Date(),
             updated_at: new Date()
         };
+
+        if (description) assetDetails.description = description;
+        if (classification) assetDetails.classification = classification;
+        if (location) assetDetails.location = location;
+        if (owner) assetDetails.owner = owner;
+        if (value) assetDetails.value = value;
 
         // 3. Insert into MongoDB
         const mongoResult = await mongoDB.collection('assets').insertOne(assetDetails);
