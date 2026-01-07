@@ -46,24 +46,35 @@
 
         <div class="dashboard-sections">
             <div class="dashboard-section">
-                <h2 id="asset-management-h2"><i class="ri-folder-2-fill"></i> Asset-Management</h2>
-                <button id="add-asset-btn"><i class="ri-add-fill"></i> Add new asset</button>
+                <div class="dashboard-section-header">
+                    <h2 id="asset-management-h2"><i class="ri-folder-2-fill"></i> Asset-Management</h2>
+                    <button id="add-asset-btn"><i class="ri-add-fill"></i> Add new asset</button>
+                </div>
+                <div id="asset-list"></div>
             </div>
             <div class="dashboard-section">
-                <h2 id="risk-assessment-h2"><i class="ri-shield-fill"></i> Risk Assessment</h2>
-                <button><i class="ri-add-fill"></i> Add new risk</button>
+                <div class="dashboard-section-header">
+                    <h2 id="risk-assessment-h2"><i class="ri-shield-fill"></i> Risk Assessment</h2>
+                    <button><i class="ri-add-fill"></i> Add new risk</button>
+                </div>
             </div>
             <div class="dashboard-section">
-                <h2 id="policies-h2"><i class="ri-file-list-3-fill"></i> Policies</h2>
-                <button><i class="ri-add-fill"></i> Add new policy</button>
+                <div class="dashboard-section-header">
+                    <h2 id="policies-h2"><i class="ri-file-list-3-fill"></i> Policies</h2>
+                    <button><i class="ri-add-fill"></i> Add new policy</button>
+                </div>
             </div>
             <div class="dashboard-section">
-                <h2 id="compliance-audit-h2"><i class="ri-checkbox-multiple-fill"></i> Compliance & Audit</h2>
-                <button><i class="ri-add-fill"></i> Add new audit</button>
+                <div class="dashboard-section-header">
+                    <h2 id="compliance-audit-h2"><i class="ri-checkbox-multiple-fill"></i> Compliance & Audit</h2>
+                    <button><i class="ri-add-fill"></i> Add new audit</button>
+                </div>
             </div>
             <div class="dashboard-section">
-                <h2 id="incident-management-h2"><i class="ri-alert-fill"></i> Incident-Management</h2>
-                <button><i class="ri-add-fill"></i> Report new incident</button>
+                <div class="dashboard-section-header">
+                    <h2 id="incident-management-h2"><i class="ri-alert-fill"></i> Incident-Management</h2>
+                    <button><i class="ri-add-fill"></i> Report new incident</button>
+                </div>
             </div>
         </div>
     </main>
@@ -171,6 +182,10 @@
             }
 
             const addAssetForm = document.getElementById('add-asset-form');
+
+            // Load assets when the page is ready
+            loadAssets();
+
             if (addAssetForm) {
                 addAssetForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
@@ -199,8 +214,6 @@
                         companyId: parseInt(companyId, 10)
                     };
 
-                    alert("Data being sent to the server:\n" + JSON.stringify(payload, null, 2));
-
                     try {
                         const response = await fetch('http://localhost:5000/api/assets', {
                             method: 'POST',
@@ -216,7 +229,7 @@
                             alert('Asset created successfully!');
                             addAssetModal.classList.add('modal-hidden');
                             addAssetForm.reset();
-                            // Optionally, refresh the asset list or update the UI
+                            loadAssets(); // Refresh the asset list
                         } else {
                             alert(`Error: ${result.message}`);
                         }
@@ -227,6 +240,109 @@
                 });
             }
         });
+
+        async function loadAssets() {
+            const assetList = document.getElementById('asset-list');
+            if (!assetList) return;
+
+            const companyId = localStorage.getItem('companyId');
+            if (!companyId) {
+                assetList.innerHTML = '<p>Could not determine company. Please log in again.</p>';
+                return;
+            }
+
+            assetList.innerHTML = '<p>Loading assets...</p>'; // Show a loading message
+
+            const query = `
+                query GetAssets($compId: Int!) {
+                    assets(comp_id: $compId) {
+                        asset_id
+                        mongo {
+                            name
+                            type
+                            description
+                            classification
+                            location
+                            owner
+                            value
+                            status
+                        }
+                    }
+                }
+            `;
+
+            const variables = {
+                compId: parseInt(companyId, 10)
+            };
+
+            try {
+                const response = await fetch('http://localhost:4000', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        query,
+                        variables 
+                    })
+                });
+
+                const json = await response.json();
+
+                if(json.errors) {
+                    throw new Error(json.errors.map(e => e.message).join('\n'));
+                }
+
+                const assets = json.data.assets;
+
+                assetList.innerHTML = ''; // Clear the list
+
+                if (assets && assets.length > 0) {
+                    const table = document.createElement('table');
+                    table.innerHTML = `
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                                <th>Classification</th>
+                                <th>Location</th>
+                                <th>Owner</th>
+                                <th>Value</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    `;
+                    const tbody = table.querySelector('tbody');
+                    assets.forEach(asset => {
+                        if (asset.mongo) {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${asset.asset_id}</td>
+                                <td>${asset.mongo.name || ''}</td>
+                                <td>${asset.mongo.type || ''}</td>
+                                <td>${asset.mongo.description || ''}</td>
+                                <td>${asset.mongo.classification || ''}</td>
+                                <td>${asset.mongo.location || ''}</td>
+                                <td>${asset.mongo.owner || ''}</td>
+                                <td>${asset.mongo.value || ''}</td>
+                                <td>${asset.mongo.status || ''}</td>
+                            `;
+                            tbody.appendChild(row);
+                        }
+                    });
+                    assetList.appendChild(table);
+                } else {
+                    assetList.innerHTML = '<p>No assets found for your company.</p>';
+                }
+            } catch (error) {
+                console.error('Failed to fetch assets:', error);
+                assetList.innerHTML = `<p>Error loading assets: ${error.message}</p>`;
+            }
+        }
     </script>
 </body>
 </html>

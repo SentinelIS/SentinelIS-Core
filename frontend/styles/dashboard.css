@@ -109,11 +109,63 @@ main {
 }
 
 .dashboard-section {
+    display: block;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border);
+}
+
+.dashboard-section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 15px;
+}
+
+#asset-list {
+    width: 100%;
+    overflow-x: auto; /* Ensures table is scrollable on small screens */
+    margin-top: 15px;
+}
+
+#asset-list table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--card);
+    border-radius: var(--radius);
+    overflow: hidden; /* Ensures the child elements adhere to the border radius */
+    box-shadow: var(--shadow);
+}
+
+#asset-list th,
+#asset-list td {
+    padding: 12px 15px;
+    text-align: left;
     border-bottom: 1px solid var(--border);
+    font-size: 14px;
+}
+
+#asset-list th {
+    background-color: #f8fafc; /* A slightly different shade for the header */
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+}
+
+#asset-list td {
+    color: var(--navy);
+}
+
+#asset-list tr:last-child td {
+    border-bottom: none; /* Remove border from the last row */
+}
+
+#asset-list tr:nth-child(even) {
+    background-color: #fdfdff;
+}
+
+#asset-list tr:hover {
+    background-color: #f1f5f9; /* Highlight on hover */
 }
 
 .dashboard-section h2 {

@@ -91,7 +91,7 @@ const typeDefs = gql`
 
   type Query {
     asset(asset_id: ID!): Asset
-    assets: [Asset!]!
+    assets(comp_id: Int!): [Asset!]!
   }
 `;
 
@@ -130,12 +130,12 @@ const resolvers = {
       };
     },
 
-    assets: async () => {
-      console.log(`[QUERY] Fetching all assets...`);
+    assets: async (_, { comp_id }) => {
+      console.log(`[QUERY] Fetching all assets for comp_id: ${comp_id}`);
       
-      console.log(`[MYSQL] Executing SELECT * FROM ASSET_MGMT`);
-      const [rows] = await mysqlPool.query("SELECT * FROM ASSET_MGMT");
-      console.log(`[MYSQL] Found ${rows.length} assets in MySQL`);
+      console.log(`[MYSQL] Executing SELECT * FROM ASSET_MGMT WHERE COMP_ID = ?`);
+      const [rows] = await mysqlPool.query("SELECT * FROM ASSET_MGMT WHERE COMP_ID = ?", [comp_id]);
+      console.log(`[MYSQL] Found ${rows.length} assets in MySQL for comp_id: ${comp_id}`);
 
       console.log(`[PROCESSING] Enriching assets with MongoDB data...`);
       const assets = await Promise.all(rows.map(async (row, index) => {
