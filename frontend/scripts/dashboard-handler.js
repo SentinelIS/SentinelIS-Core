@@ -40,6 +40,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Load assets when the page is ready
     fetchAndRenderAssets();
+    
+    // Load analytics charts
+    loadAnalytics();
+    
+    // Refresh analytics button
+    const refreshAnalyticsBtn = document.getElementById('refresh-analytics-btn');
+    if (refreshAnalyticsBtn) {
+        refreshAnalyticsBtn.addEventListener('click', () => {
+            loadAnalytics();
+        });
+    }
 
     // Add event listeners for filter and sort controls
     document.getElementById('filter-keyword').addEventListener('input', renderAssets);
@@ -94,10 +105,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = await response.json();
 
                 if (response.ok && result.success) {
-                    alert('Asset created successfully!');
-                    addAssetModal.classList.add('modal-hidden');
-                    addAssetForm.reset();
-                    fetchAndRenderAssets(); // Refresh the asset list
+                        alert('Asset created successfully!');
+                        addAssetModal.classList.add('modal-hidden');
+                        addAssetForm.reset();
+                        fetchAndRenderAssets(); // Refresh the asset list
+                        loadAnalytics(); // Refresh charts
                 } else {
                     alert(`Error: ${result.message}`);
                 }
@@ -154,6 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 setEditMode(true); // back to readonly
                 closeEditModal();
                 fetchAndRenderAssets();
+                loadAnalytics(); // Refresh charts
             } catch (error) {
                 console.error('Failed to update asset:', error);
                 console.error(`Error updating asset: ${error.message}`);
@@ -178,9 +191,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('Asset deleted');
                 closeEditModal();
                 fetchAndRenderAssets();
+                loadAnalytics(); // Refresh charts
             } catch (error) {
                 console.error('Failed to delete asset:', error);
                 alert(`Error deleting asset: ${error.message}`);
+            }
+        });
+    }
+
+    // Toggle analytics dashboard
+    const toggleButton = document.getElementById('toggle-analytics-btn');
+    const analyticsContent = document.querySelector('.analytics-content');
+    const toggleIcon = toggleButton ? toggleButton.querySelector('i') : null;
+
+    if (toggleButton && analyticsContent && toggleIcon) {
+        toggleButton.addEventListener('click', () => {
+            analyticsContent.classList.toggle('collapsed');
+            const isCollapsed = analyticsContent.classList.contains('collapsed');
+            if (isCollapsed) {
+                toggleIcon.classList.remove('ri-arrow-up-s-line');
+                toggleIcon.classList.add('ri-arrow-down-s-line');
+            } else {
+                toggleIcon.classList.remove('ri-arrow-down-s-line');
+                toggleIcon.classList.add('ri-arrow-up-s-line');
             }
         });
     }
@@ -394,4 +427,159 @@ async function openEditModal(assetId) {
         console.error('Failed to open asset modal:', error);
         alert(`Could not load asset: ${error.message}`);
     }
+}
+
+// Analytics Charts
+let chartInstances = {};
+
+async function loadAnalytics() {
+    const companyId = localStorage.getItem('companyId');
+    if (!companyId) {
+        console.error('Company ID not found');
+        return;
+    }
+    
+    try {
+        // Load summary first
+        const summaryResponse = await fetch(`http://localhost:5000/api/assets/analytics/summary?companyId=${companyId}`);
+        const summaryResult = await summaryResponse.json();
+        
+        if (summaryResult.success) {
+            document.getElementById('summary-total').textContent = summaryResult.data.totalAssets || 0;
+            document.getElementById('summary-high-value').textContent = summaryResult.data.highValueAssets || 0;
+        }
+        
+        // Load and render all charts
+        await Promise.all([
+            loadChart('by-type', 'pie', 'Assets by Type', companyId),
+            loadChart('by-status', 'bar', 'Assets by Status', companyId),
+            loadChart('by-value', 'doughnut', 'Assets by Value', companyId),
+            loadChart('by-classification', 'bar', 'Assets by Classification', companyId),
+            loadChart('by-month', 'line', 'Assets Created Over Time', companyId)
+        ]);
+    } catch (error) {
+        console.error('Failed to load analytics:', error);
+    }
+}
+
+async function loadChart(chartType, chartKind, title, companyId) {
+    try {
+        const response = await fetch(`http://localhost:5000/api/assets/analytics/${chartType}?companyId=${companyId}`);
+        const result = await response.json();
+        
+        if (!result.success || !result.data) {
+            console.error(`Failed to load ${chartType} data`);
+            return;
+        }
+        
+        const canvasId = `chart-${chartType}`;
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        
+        // Destroy existing chart if it exists
+        if (chartInstances[canvasId]) {
+            chartInstances[canvasId].destroy();
+        }
+        
+        // Prepare data based on chart type
+        let labels, data, backgroundColor, borderColor;
+        
+        if (chartType === 'by-month') {
+            labels = result.data.map(item => item.label || `${item.monthName} ${item.year}`);
+            data = result.data.map(item => item.count);
+            backgroundColor = 'rgba(37, 99, 235, 0.2)';
+            borderColor = 'rgba(37, 99, 235, 1)';
+        } else {
+            const fieldMap = {
+                'by-type': 'type',
+                'by-status': 'status',
+                'by-value': 'value',
+                'by-classification': 'classification'
+            };
+            const field = fieldMap[chartType];
+            labels = result.data.map(item => item[field] || 'Unknown');
+            data = result.data.map(item => item.count);
+            
+            // Generate colors
+            const colors = generateColors(data.length);
+            backgroundColor = chartKind === 'line' ? 'rgba(37, 99, 235, 0.2)' : colors.background;
+            borderColor = chartKind === 'line' ? 'rgba(37, 99, 235, 1)' : colors.border;
+        }
+        
+        // Create chart configuration
+        const config = {
+            type: chartKind,
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: title,
+                    data: data,
+                    backgroundColor: Array.isArray(backgroundColor) ? backgroundColor : [backgroundColor],
+                    borderColor: Array.isArray(borderColor) ? borderColor : [borderColor],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: chartKind === 'line' ? 'top' : 'right',
+                        labels: {
+                            padding: 15,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                        padding: 12,
+                        titleFont: {
+                            size: 14
+                        },
+                        bodyFont: {
+                            size: 13
+                        }
+                    }
+                },
+                scales: chartKind === 'line' || chartKind === 'bar' ? {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                } : {}
+            }
+        };
+        
+        chartInstances[canvasId] = new Chart(canvas, config);
+    } catch (error) {
+        console.error(`Failed to load ${chartType} chart:`, error);
+    }
+}
+
+function generateColors(count) {
+    const colorPalettes = [
+        ['rgba(37, 99, 235, 0.8)', 'rgba(37, 99, 235, 1)'],      // Blue
+        ['rgba(16, 185, 129, 0.8)', 'rgba(16, 185, 129, 1)'],    // Green
+        ['rgba(245, 101, 101, 0.8)', 'rgba(245, 101, 101, 1)'],  // Red
+        ['rgba(251, 191, 36, 0.8)', 'rgba(251, 191, 36, 1)'],    // Yellow
+        ['rgba(139, 92, 246, 0.8)', 'rgba(139, 92, 246, 1)'],    // Purple
+        ['rgba(236, 72, 153, 0.8)', 'rgba(236, 72, 153, 1)'],    // Pink
+        ['rgba(20, 184, 166, 0.8)', 'rgba(20, 184, 166, 1)'],    // Teal
+        ['rgba(249, 115, 22, 0.8)', 'rgba(249, 115, 22, 1)']     // Orange
+    ];
+    
+    const background = [];
+    const border = [];
+    
+    for (let i = 0; i < count; i++) {
+        const palette = colorPalettes[i % colorPalettes.length];
+        background.push(palette[0]);
+        border.push(palette[1]);
+    }
+    
+    return { background, border };
 }

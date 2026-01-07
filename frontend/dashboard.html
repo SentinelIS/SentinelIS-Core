@@ -5,6 +5,9 @@
     <link href="https://unpkg.com/remixicon/fonts/remixicon.css" rel="stylesheet">
 
     <link rel="stylesheet" href="styles/dashboard.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -51,6 +54,65 @@
                     <h2 id="asset-management-h2"><i class="ri-folder-2-fill"></i> Asset-Management</h2>
                     <button id="add-asset-btn"><i class="ri-add-fill"></i> Add new asset</button>
                 </div>
+                
+                <div class="analytics-dashboard">
+                    <div class="analytics-header">
+                        <h3><i class="ri-bar-chart-fill"></i> Asset Analytics</h3>
+                        <div class="analytics-header-actions">
+                            <button id="refresh-analytics-btn" class="refresh-btn"><i class="ri-refresh-line"></i> Refresh</button>
+                            <button id="toggle-analytics-btn" class="refresh-btn"><i class="ri-arrow-up-s-line"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div class="analytics-content">
+                        <!-- Summary Cards -->
+                        <div class="summary-cards">
+                            <div class="summary-card">
+                                <div class="summary-card-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                    <i class="ri-folder-2-fill"></i>
+                                </div>
+                                <div class="summary-card-content">
+                                    <div class="summary-card-label">Total Assets</div>
+                                    <div class="summary-card-value" id="summary-total">-</div>
+                                </div>
+                            </div>
+                            <div class="summary-card">
+                                <div class="summary-card-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                                    <i class="ri-star-fill"></i>
+                                </div>
+                                <div class="summary-card-content">
+                                    <div class="summary-card-label">High Value Assets</div>
+                                    <div class="summary-card-value" id="summary-high-value">-</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Charts Grid -->
+                        <div class="charts-grid">
+                            <div class="chart-container">
+                                <h4><i class="ri-pie-chart-fill"></i> Assets by Type</h4>
+                                <canvas id="chart-by-type"></canvas>
+                            </div>
+                            <div class="chart-container">
+                                <h4><i class="ri-bar-chart-box-fill"></i> Assets by Status</h4>
+                                <canvas id="chart-by-status"></canvas>
+                            </div>
+                            <div class="chart-container">
+                                <h4><i class="ri-line-chart-fill"></i> Assets by Value</h4>
+                                <canvas id="chart-by-value"></canvas>
+                            </div>
+                            <div class="chart-container">
+                                <h4><i class="ri-shield-fill"></i> Assets by Classification</h4>
+                                <canvas id="chart-by-classification"></canvas>
+                            </div>
+                            <div class="chart-container">
+                                <h4><i class="ri-calendar-todo-fill"></i> Assets Created Over Time</h4>
+                                <canvas id="chart-by-month"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <br>
                 <div class="filter-controls">
                     <div class="filter-group">
@@ -92,6 +154,7 @@
                     </div>
                     <button id="reset-filters-btn"><i class="ri-refresh-line"></i> Reset Filters</button>
                 </div>
+                
                 <div id="asset-list"></div>
             </div>
             <div class="dashboard-section">

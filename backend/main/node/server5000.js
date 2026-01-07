@@ -8,6 +8,12 @@ API Endpoints:
 - GET /api/assets/:id - Get asset details by asset_id
 - PUT /api/assets/:id - Update asset details by asset_id
 - DELETE /api/assets/:id - Delete an asset by asset_id
+- GET /api/assets/analytics/by-type?companyId=X - Assets grouped by type
+- GET /api/assets/analytics/by-status?companyId=X - Assets grouped by status
+- GET /api/assets/analytics/by-value?companyId=X - Assets grouped by value
+- GET /api/assets/analytics/by-classification?companyId=X - Assets grouped by classification
+- GET /api/assets/analytics/by-month?companyId=X - Assets created over time (monthly)
+- GET /api/assets/analytics/summary?companyId=X - Overall summary statistics
 
 */
 
@@ -30,7 +36,9 @@ let redisEnabled = false;
 
 // Cache configuration
 const CACHE_TTL = 3600; // 1 hour in seconds
+const CACHE_TTL_AGGREGATIONS = 300; // 5 minutes for aggregations (shorter TTL since they change more frequently)
 const CACHE_KEY_PREFIX = 'asset:';
+const CACHE_KEY_PREFIX_AGG = 'agg:';
 
 (async () => {
     try {
@@ -162,6 +170,66 @@ async function invalidateAssetCache(assetId) {
     }
 }
 
+// Aggregation cache helper functions
+async function getCachedAggregation(aggType, companyId) {
+    if (!redisEnabled || !redisClient) return null;
+    try {
+        const cacheKey = `${CACHE_KEY_PREFIX_AGG}${aggType}:${companyId}`;
+        const cached = await redisClient.get(cacheKey);
+        if (cached) {
+            console.log(`[CACHE] Cache HIT for aggregation ${aggType} (company ${companyId})`);
+            return JSON.parse(cached);
+        }
+        console.log(`[CACHE] Cache MISS for aggregation ${aggType} (company ${companyId})`);
+        return null;
+    } catch (err) {
+        console.error('[CACHE] Error reading aggregation from cache:', err);
+        return null;
+    }
+}
+
+async function setCachedAggregation(aggType, companyId, data) {
+    if (!redisEnabled || !redisClient) return;
+    try {
+        const cacheKey = `${CACHE_KEY_PREFIX_AGG}${aggType}:${companyId}`;
+        await redisClient.setEx(cacheKey, CACHE_TTL_AGGREGATIONS, JSON.stringify(data));
+        console.log(`[CACHE] Cached aggregation ${aggType} (company ${companyId}) for ${CACHE_TTL_AGGREGATIONS}s`);
+    } catch (err) {
+        console.error('[CACHE] Error writing aggregation to cache:', err);
+    }
+}
+
+async function invalidateAllAggregations(companyId) {
+    if (!redisEnabled || !redisClient) return;
+    try {
+        // Invalidate all aggregation caches for this company
+        const pattern = `${CACHE_KEY_PREFIX_AGG}*:${companyId}`;
+        const keys = await redisClient.keys(pattern);
+        if (keys.length > 0) {
+            await redisClient.del(keys);
+            console.log(`[CACHE] Invalidated ${keys.length} aggregation cache(s) for company ${companyId}`);
+        }
+    } catch (err) {
+        console.error('[CACHE] Error invalidating aggregation caches:', err);
+    }
+}
+
+// Helper function to get asset IDs for a company
+async function getCompanyAssetIds(companyId) {
+    try {
+        const sqlConnection = await mysqlPool.getConnection();
+        const [rows] = await sqlConnection.query(
+            'SELECT ASSET_ID FROM ASSET_MGMT WHERE COMP_ID = ?',
+            [companyId]
+        );
+        sqlConnection.release();
+        return rows.map(row => row.ASSET_ID);
+    } catch (err) {
+        console.error('Error fetching company asset IDs:', err);
+        return [];
+    }
+}
+
 app.post('/api/assets', async (req, res) => {
     console.log("POST /api/assets received with body:", req.body);
     const {
@@ -231,6 +299,9 @@ app.post('/api/assets', async (req, res) => {
 
         // 5. Cache the newly created asset
         await setCachedAsset(assetId, assetDetails);
+        
+        // 6. Invalidate aggregation caches since we added a new asset
+        await invalidateAllAggregations();
 
         res.status(201).json({ success: true, message: 'Asset created successfully', assetId: assetId });
 
@@ -318,6 +389,22 @@ app.put('/api/assets/:id', async (req, res) => {
 
         // Invalidate cache to force refresh on next GET
         await invalidateAssetCache(assetId);
+        
+        // Get companyId from MySQL to invalidate correct aggregation cache
+        let sqlConnection;
+        try {
+            sqlConnection = await mysqlPool.getConnection();
+            const [rows] = await sqlConnection.query(
+                'SELECT COMP_ID FROM ASSET_MGMT WHERE ASSET_ID = ?',
+                [assetId]
+            );
+            sqlConnection.release();
+            if (rows.length > 0) {
+                await invalidateAllAggregations(rows[0].COMP_ID);
+            }
+        } catch (err) {
+            console.error('Error getting companyId for cache invalidation:', err);
+        }
 
         res.json({ success: true, message: 'Asset updated successfully' });
     } catch (err) {
@@ -337,6 +424,21 @@ app.delete('/api/assets/:id', async (req, res) => {
     let sqlConnection;
     try {
         sqlConnection = await mysqlPool.getConnection();
+        
+        // Get companyId BEFORE deletion to invalidate correct aggregation cache
+        let companyIdForCache;
+        try {
+            const [rows] = await sqlConnection.query(
+                'SELECT COMP_ID FROM ASSET_MGMT WHERE ASSET_ID = ?',
+                [assetId]
+            );
+            if (rows.length > 0) {
+                companyIdForCache = rows[0].COMP_ID;
+            }
+        } catch (err) {
+            console.error('Error getting companyId for cache invalidation:', err);
+        }
+        
         await sqlConnection.beginTransaction();
 
         // Delete from MySQL first (ASSET_MGMT)
@@ -366,6 +468,11 @@ app.delete('/api/assets/:id', async (req, res) => {
 
         // Invalidate cache after deletion
         await invalidateAssetCache(assetId);
+        
+        // Invalidate aggregation caches since we deleted an asset
+        if (companyIdForCache) {
+            await invalidateAllAggregations(companyIdForCache);
+        }
 
         res.json({ success: true, message: 'Asset deleted successfully' });
     } catch (err) {
@@ -378,6 +485,366 @@ app.delete('/api/assets/:id', async (req, res) => {
                 console.error('Error during rollback:', rollbackErr);
             }
         }
+        res.status(500).json({ success: false, message: 'Server error: ' + err.message });
+    }
+});
+
+// MongoDB Aggregation Endpoints
+// GET /api/assets/analytics/by-type?companyId=X - Assets grouped by type
+app.get('/api/assets/analytics/by-type', async (req, res) => {
+    const companyId = parseInt(req.query.companyId, 10);
+    
+    if (Number.isNaN(companyId)) {
+        return res.status(400).json({ success: false, message: 'Missing or invalid companyId parameter' });
+    }
+    
+    try {
+        // Get asset IDs for this company
+        const assetIds = await getCompanyAssetIds(companyId);
+        if (assetIds.length === 0) {
+            return res.json({ success: true, data: [] });
+        }
+        
+        // Try cache first
+        let result = await getCachedAggregation('by-type', companyId);
+        
+        if (!result) {
+            result = await mongoDB.collection('assets').aggregate([
+                {
+                    $match: {
+                        asset_id: { $in: assetIds }
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$type',
+                        count: { $sum: 1 }
+                    }
+                },
+                {
+                    $sort: { count: -1 }
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        type: '$_id',
+                        count: 1
+                    }
+                }
+            ]).toArray();
+            
+            await setCachedAggregation('by-type', companyId, result);
+        }
+        
+        res.json({ success: true, data: result });
+    } catch (err) {
+        console.error('Error fetching assets by type:', err);
+        res.status(500).json({ success: false, message: 'Server error: ' + err.message });
+    }
+});
+
+// GET /api/assets/analytics/by-status?companyId=X - Assets grouped by status
+app.get('/api/assets/analytics/by-status', async (req, res) => {
+    const companyId = parseInt(req.query.companyId, 10);
+    
+    if (Number.isNaN(companyId)) {
+        return res.status(400).json({ success: false, message: 'Missing or invalid companyId parameter' });
+    }
+    
+    try {
+        const assetIds = await getCompanyAssetIds(companyId);
+        if (assetIds.length === 0) {
+            return res.json({ success: true, data: [] });
+        }
+        
+        let result = await getCachedAggregation('by-status', companyId);
+        
+        if (!result) {
+            result = await mongoDB.collection('assets').aggregate([
+                {
+                    $match: {
+                        asset_id: { $in: assetIds }
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$status',
+                        count: { $sum: 1 }
+                    }
+                },
+                {
+                    $sort: { count: -1 }
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        status: '$_id',
+                        count: 1
+                    }
+                }
+            ]).toArray();
+            
+            await setCachedAggregation('by-status', companyId, result);
+        }
+        
+        res.json({ success: true, data: result });
+    } catch (err) {
+        console.error('Error fetching assets by status:', err);
+        res.status(500).json({ success: false, message: 'Server error: ' + err.message });
+    }
+});
+
+// GET /api/assets/analytics/by-value?companyId=X - Assets grouped by value
+app.get('/api/assets/analytics/by-value', async (req, res) => {
+    const companyId = parseInt(req.query.companyId, 10);
+    
+    if (Number.isNaN(companyId)) {
+        return res.status(400).json({ success: false, message: 'Missing or invalid companyId parameter' });
+    }
+    
+    try {
+        const assetIds = await getCompanyAssetIds(companyId);
+        if (assetIds.length === 0) {
+            return res.json({ success: true, data: [] });
+        }
+        
+        let result = await getCachedAggregation('by-value', companyId);
+        
+        if (!result) {
+            result = await mongoDB.collection('assets').aggregate([
+                {
+                    $match: {
+                        asset_id: { $in: assetIds }
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$value',
+                        count: { $sum: 1 }
+                    }
+                },
+                {
+                    $sort: { 
+                        _id: 1 // Sort by value order: low, medium, high, critical
+                    }
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        value: '$_id',
+                        count: 1
+                    }
+                }
+            ]).toArray();
+            
+            await setCachedAggregation('by-value', companyId, result);
+        }
+        
+        res.json({ success: true, data: result });
+    } catch (err) {
+        console.error('Error fetching assets by value:', err);
+        res.status(500).json({ success: false, message: 'Server error: ' + err.message });
+    }
+});
+
+// GET /api/assets/analytics/by-classification?companyId=X - Assets grouped by classification
+app.get('/api/assets/analytics/by-classification', async (req, res) => {
+    const companyId = parseInt(req.query.companyId, 10);
+    
+    if (Number.isNaN(companyId)) {
+        return res.status(400).json({ success: false, message: 'Missing or invalid companyId parameter' });
+    }
+    
+    try {
+        const assetIds = await getCompanyAssetIds(companyId);
+        if (assetIds.length === 0) {
+            return res.json({ success: true, data: [] });
+        }
+        
+        let result = await getCachedAggregation('by-classification', companyId);
+        
+        if (!result) {
+            result = await mongoDB.collection('assets').aggregate([
+                {
+                    $match: {
+                        asset_id: { $in: assetIds }
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$classification',
+                        count: { $sum: 1 }
+                    }
+                },
+                {
+                    $sort: { count: -1 }
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        classification: '$_id',
+                        count: 1
+                    }
+                }
+            ]).toArray();
+            
+            await setCachedAggregation('by-classification', companyId, result);
+        }
+        
+        res.json({ success: true, data: result });
+    } catch (err) {
+        console.error('Error fetching assets by classification:', err);
+        res.status(500).json({ success: false, message: 'Server error: ' + err.message });
+    }
+});
+
+// GET /api/assets/analytics/by-month?companyId=X - Assets created over time (monthly)
+app.get('/api/assets/analytics/by-month', async (req, res) => {
+    const companyId = parseInt(req.query.companyId, 10);
+    
+    if (Number.isNaN(companyId)) {
+        return res.status(400).json({ success: false, message: 'Missing or invalid companyId parameter' });
+    }
+    
+    try {
+        const assetIds = await getCompanyAssetIds(companyId);
+        if (assetIds.length === 0) {
+            return res.json({ success: true, data: [] });
+        }
+        
+        let result = await getCachedAggregation('by-month', companyId);
+        
+        if (!result) {
+            result = await mongoDB.collection('assets').aggregate([
+                {
+                    $match: {
+                        asset_id: { $in: assetIds },
+                        created_at: { $exists: true }
+                    }
+                },
+                {
+                    $group: {
+                        _id: {
+                            year: { $year: '$created_at' },
+                            month: { $month: '$created_at' }
+                        },
+                        count: { $sum: 1 }
+                    }
+                },
+                {
+                    $sort: {
+                        '_id.year': 1,
+                        '_id.month': 1
+                    }
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        year: '$_id.year',
+                        month: '$_id.month',
+                        monthName: {
+                            $arrayElemAt: [
+                                ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                                { $subtract: ['$_id.month', 1] }
+                            ]
+                        },
+                        label: {
+                            $concat: [
+                                { $arrayElemAt: [
+                                    ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                                    { $subtract: ['$_id.month', 1] }
+                                ]},
+                                ' ',
+                                { $toString: '$_id.year' }
+                            ]
+                        },
+                        count: 1
+                    }
+                }
+            ]).toArray();
+            
+            await setCachedAggregation('by-month', companyId, result);
+        }
+        
+        res.json({ success: true, data: result });
+    } catch (err) {
+        console.error('Error fetching assets by month:', err);
+        res.status(500).json({ success: false, message: 'Server error: ' + err.message });
+    }
+});
+
+// GET /api/assets/analytics/summary?companyId=X - Overall summary statistics
+app.get('/api/assets/analytics/summary', async (req, res) => {
+    const companyId = parseInt(req.query.companyId, 10);
+    
+    if (Number.isNaN(companyId)) {
+        return res.status(400).json({ success: false, message: 'Missing or invalid companyId parameter' });
+    }
+    
+    try {
+        const assetIds = await getCompanyAssetIds(companyId);
+        if (assetIds.length === 0) {
+            return res.json({ 
+                success: true, 
+                data: {
+                    totalAssets: 0,
+                    highValueAssets: 0,
+                    byType: [],
+                    byStatus: [],
+                    byValue: []
+                }
+            });
+        }
+        
+        let result = await getCachedAggregation('summary', companyId);
+        
+        if (!result) {
+            const pipeline = [
+                {
+                    $match: {
+                        asset_id: { $in: assetIds }
+                    }
+                },
+                {
+                    $facet: {
+                        totalAssets: [{ $count: 'count' }],
+                        byType: [
+                            { $group: { _id: '$type', count: { $sum: 1 } } },
+                            { $project: { _id: 0, type: '$_id', count: 1 } }
+                        ],
+                        byStatus: [
+                            { $group: { _id: '$status', count: { $sum: 1 } } },
+                            { $project: { _id: 0, status: '$_id', count: 1 } }
+                        ],
+                        byValue: [
+                            { $group: { _id: '$value', count: { $sum: 1 } } },
+                            { $project: { _id: 0, value: '$_id', count: 1 } }
+                        ],
+                        highValueAssets: [
+                            { $match: { value: { $in: ['high', 'critical'] } } },
+                            { $count: 'count' }
+                        ]
+                    }
+                }
+            ];
+            
+            const aggregationResult = await mongoDB.collection('assets').aggregate(pipeline).toArray();
+            const facetData = aggregationResult[0];
+            
+            result = {
+                totalAssets: facetData.totalAssets[0]?.count || 0,
+                highValueAssets: facetData.highValueAssets[0]?.count || 0,
+                byType: facetData.byType,
+                byStatus: facetData.byStatus,
+                byValue: facetData.byValue
+            };
+            
+            await setCachedAggregation('summary', companyId, result);
+        }
+        
+        res.json({ success: true, data: result });
+    } catch (err) {
+        console.error('Error fetching summary analytics:', err);
         res.status(500).json({ success: false, message: 'Server error: ' + err.message });
     }
 });
