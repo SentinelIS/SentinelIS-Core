@@ -43,4 +43,25 @@ file = "node/server5000.js"
 description = "Create a new asset"
 method = "POST"
 path = "/api/assets"
-create_date = "05.12.2025"
+create_date = "06.01.2026"
+
+[[routes]]
+file = "node/server5000.js"
+description = "Get asset details by asset_id"
+method = "GET"
+path = "/api/assets/:id"
+create_date = "07.01.2026"
+
+[[routes]]
+file = "node/server5000.js"
+description = "Update asset details by asset_id"
+method = "PUT"
+path = "/api/assets/:id"
+create_date = "07.01.2026"
+
+[[routes]]
+file = "node/server5000.js"
+description = "Delete asset by asset_id"
+method = "DELETE"
+path = "/api/assets/:id"
+create_date = "07.01.2026"

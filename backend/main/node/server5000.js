@@ -5,6 +5,9 @@
 
 API Endpoints:
 - POST /api/assets - Create a new asset
+- GET /api/assets/:id - Get asset details by asset_id
+- PUT /api/assets/:id - Update asset details by asset_id
+- DELETE /api/assets/:id - Delete an asset by asset_id
 
 */
 
