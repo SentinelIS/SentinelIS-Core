@@ -337,10 +337,18 @@ button:active{
     padding: 0 22px 18px;
 }
 
-#add-asset-form {
+#add-asset-form,
+#edit-asset-form {
     display: flex;
     flex-direction: column;
     gap: 16px;
+}
+
+.readonly-mode input,
+.readonly-mode select,
+.readonly-mode textarea {
+    pointer-events: none;
+    background-color: #f8fafc !important;
 }
 
 .field{
@@ -355,7 +363,8 @@ button:active{
     gap: 16px;
 }
 
-#add-asset-form label {
+#add-asset-form label,
+#edit-asset-form label {
     font-size:12px;
     font-weight:600;
     color:var(--muted);
@@ -365,7 +374,10 @@ button:active{
 
 #add-asset-form input,
 #add-asset-form select,
-#add-asset-form textarea {
+#add-asset-form textarea,
+#edit-asset-form input,
+#edit-asset-form select,
+#edit-asset-form textarea {
     width:100%;
     padding:12px 14px;
     font-size:14px;
@@ -382,13 +394,17 @@ button:active{
 
 #add-asset-form input:focus,
 #add-asset-form select:focus,
-#add-asset-form textarea:focus {
+#add-asset-form textarea:focus,
+#edit-asset-form input:focus,
+#edit-asset-form select:focus,
+#edit-asset-form textarea:focus {
     border-color:var(--primary);
     box-shadow:0 4px 18px rgba(37,99,235,0.08), 0 0 0 4px rgba(37,99,235,0.06);
     transform:translateY(-1px);
 }
 
-#add-asset-form select {
+#add-asset-form select,
+#edit-asset-form select {
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
     background-position: right 0.5rem center;
     background-repeat: no-repeat;
@@ -396,16 +412,38 @@ button:active{
     padding-right: 2.5rem;
 }
 
-#add-asset-form textarea {
+#add-asset-form textarea,
+#edit-asset-form textarea {
     resize: vertical;
 }
 
 .modal-footer {
     display: flex;
     justify-content: flex-end;
+    gap: 10px;
     margin-top: 10px;
 }
 
 .primary-btn {
     width: 100%;
 }
+
+.secondary-btn {
+    background: #e2e8f0;
+    color: var(--navy);
+    box-shadow: none;
+}
+.secondary-btn:hover {
+    background: #cbd5e1;
+    filter: none;
+    box-shadow: none;
+}
+
+.danger-btn {
+    background: #ef4444;
+    color: #fff;
+}
+.danger-btn:hover {
+    background: #dc2626;
+}
+

@@ -147,7 +147,128 @@ app.post('/api/assets', async (req, res) => {
     }
 });
 
+// Get a single asset (Mongo details) by numeric asset_id
+app.get('/api/assets/:id', async (req, res) => {
+    const assetId = parseInt(req.params.id, 10);
 
+    if (Number.isNaN(assetId)) {
+        return res.status(400).json({ success: false, message: 'Invalid asset id' });
+    }
+
+    try {
+        const asset = await mongoDB.collection('assets').findOne({ asset_id: assetId });
+
+        if (!asset) {
+            return res.status(404).json({ success: false, message: 'Asset not found' });
+        }
+
+        res.json({ success: true, asset });
+    } catch (err) {
+        console.error('Error fetching asset:', err);
+        res.status(500).json({ success: false, message: 'Server error: ' + err.message });
+    }
+});
+
+// Update MongoDB asset details by asset_id
+app.put('/api/assets/:id', async (req, res) => {
+    const assetId = parseInt(req.params.id, 10);
+
+    if (Number.isNaN(assetId)) {
+        return res.status(400).json({ success: false, message: 'Invalid asset id' });
+    }
+
+    const {
+        name,
+        type,
+        description,
+        classification,
+        location,
+        owner,
+        value,
+        status
+    } = req.body;
+
+    const updateFields = {};
+    if (name !== undefined) updateFields.name = name;
+    if (type !== undefined) updateFields.type = type;
+    if (description !== undefined) updateFields.description = description;
+    if (classification !== undefined) updateFields.classification = classification;
+    if (location !== undefined) updateFields.location = location;
+    if (owner !== undefined) updateFields.owner = owner;
+    if (value !== undefined) updateFields.value = value;
+    if (status !== undefined) updateFields.status = status;
+
+    updateFields.updated_at = new Date();
+
+    try {
+        const result = await mongoDB.collection('assets').updateOne(
+            { asset_id: assetId },
+            { $set: updateFields }
+        );
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ success: false, message: 'Asset not found' });
+        }
+
+        res.json({ success: true, message: 'Asset updated successfully' });
+    } catch (err) {
+        console.error('Error updating asset:', err);
+        res.status(500).json({ success: false, message: 'Server error: ' + err.message });
+    }
+});
+
+// Delete an asset from both MySQL and MongoDB
+app.delete('/api/assets/:id', async (req, res) => {
+    const assetId = parseInt(req.params.id, 10);
+
+    if (Number.isNaN(assetId)) {
+        return res.status(400).json({ success: false, message: 'Invalid asset id' });
+    }
+
+    let sqlConnection;
+    try {
+        sqlConnection = await mysqlPool.getConnection();
+        await sqlConnection.beginTransaction();
+
+        // Delete from MySQL first (ASSET_MGMT)
+        const [sqlResult] = await sqlConnection.query(
+            'DELETE FROM ASSET_MGMT WHERE ASSET_ID = ?',
+            [assetId]
+        );
+
+        if (sqlResult.affectedRows === 0) {
+            await sqlConnection.rollback();
+            sqlConnection.release();
+            return res.status(404).json({ success: false, message: 'Asset not found in MySQL' });
+        }
+
+        // Delete from MongoDB
+        const mongoResult = await mongoDB.collection('assets').deleteOne({ asset_id: assetId });
+
+        if (mongoResult.deletedCount === 0) {
+            // Rollback SQL delete if Mongo delete fails / no document found
+            await sqlConnection.rollback();
+            sqlConnection.release();
+            return res.status(404).json({ success: false, message: 'Asset not found in MongoDB' });
+        }
+
+        await sqlConnection.commit();
+        sqlConnection.release();
+
+        res.json({ success: true, message: 'Asset deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting asset:', err);
+        if (sqlConnection) {
+            try {
+                await sqlConnection.rollback();
+                sqlConnection.release();
+            } catch (rollbackErr) {
+                console.error('Error during rollback:', rollbackErr);
+            }
+        }
+        res.status(500).json({ success: false, message: 'Server error: ' + err.message });
+    }
+});
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

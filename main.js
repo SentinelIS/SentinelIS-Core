@@ -18,7 +18,7 @@ function createWindow() {
   win.loadFile(path.join(__dirname, 'frontend', 'index.html'));
 
   // optional: open devtools for debugging
-  win.webContents.openDevTools();
+  // win.webContents.openDevTools();
 }
 
 app.whenReady().then(() => {
