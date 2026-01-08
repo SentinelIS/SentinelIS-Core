@@ -149,6 +149,10 @@ dotnet run
 
 ### Python Server
 
+If you use Python 3.13 you have to activate Python 3.12 first. Pillow does not work well or not at all on Python 3.13.
+
+
+
 ```python
 # New venv
 python3.12 -m venv venv
