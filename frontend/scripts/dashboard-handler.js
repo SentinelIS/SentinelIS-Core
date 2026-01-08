@@ -44,6 +44,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load analytics charts
     loadAnalytics();
     
+    // Load profile picture
+    loadProfilePicture();
+    
+    // Setup profile picture upload
+    setupProfilePictureUpload();
+    
     // Refresh analytics button
     const refreshAnalyticsBtn = document.getElementById('refresh-analytics-btn');
     if (refreshAnalyticsBtn) {
@@ -582,4 +588,247 @@ function generateColors(count) {
     }
     
     return { background, border };
+}
+
+// Profile Picture Functions
+let currentUserId = null;
+
+async function getUserId() {
+    if (currentUserId) return currentUserId;
+    
+    // Prefer userId from localStorage if present
+    const storedUserId = localStorage.getItem('userId');
+    if (storedUserId) {
+        currentUserId = parseInt(storedUserId, 10);
+        return currentUserId;
+    }
+    
+    const username = localStorage.getItem('username');
+    const companyId = localStorage.getItem('companyId');
+    
+    if (!username || !companyId) {
+        console.error('Username or companyId not found');
+        return null;
+    }
+    
+    try {
+        const response = await fetch(`http://localhost:6001/api/user-id?username=${encodeURIComponent(username)}&companyId=${encodeURIComponent(companyId)}`);
+        const result = await response.json();
+        
+        if (result.success && result.userId) {
+            currentUserId = result.userId;
+            localStorage.setItem('userId', result.userId);
+            return currentUserId;
+        }
+        return null;
+    } catch (error) {
+        console.error('Failed to get userId:', error);
+        return null;
+    }
+}
+
+async function loadProfilePicture() {
+    const userId = await getUserId();
+    if (!userId) return;
+    
+    const profilePic = document.getElementById('profile-picture');
+    const placeholder = document.getElementById('profile-picture-placeholder');
+    
+    try {
+        const response = await fetch(`http://localhost:6001/api/profile-picture/${userId}`);
+        
+        if (response.ok) {
+            const blob = await response.blob();
+            const imageUrl = URL.createObjectURL(blob);
+            profilePic.src = imageUrl;
+            profilePic.style.display = 'block';
+            if (placeholder) placeholder.style.display = 'none';
+        } else {
+            // No profile picture, show placeholder
+            if (profilePic) profilePic.style.display = 'none';
+            if (placeholder) placeholder.style.display = 'flex';
+        }
+    } catch (error) {
+        console.error('Failed to load profile picture:', error);
+        if (profilePic) profilePic.style.display = 'none';
+        if (placeholder) placeholder.style.display = 'flex';
+    }
+}
+
+function setupProfilePictureUpload() {
+    const profileContainer = document.getElementById('profile-picture-container');
+    const profileInput = document.getElementById('profile-picture-input');
+    const uploadModal = document.getElementById('profile-upload-modal');
+    const uploadModalClose = document.getElementById('profile-upload-modal-close');
+    const cancelUploadBtn = document.getElementById('cancel-upload-btn');
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput = document.getElementById('file-input');
+    const uploadBtn = document.getElementById('upload-btn');
+    const imagePreview = document.getElementById('image-preview');
+    const previewImg = document.getElementById('preview-img');
+    const removePreviewBtn = document.getElementById('remove-preview');
+    
+    let selectedFile = null;
+    
+    // Open upload modal when clicking profile picture
+    if (profileContainer) {
+        profileContainer.addEventListener('click', async () => {
+            const userId = await getUserId();
+            if (!userId) {
+                alert('Could not determine user ID. Please log in again.');
+                return;
+            }
+            if (uploadModal) uploadModal.classList.remove('modal-hidden');
+        });
+    }
+    
+    // Close modal handlers
+    if (uploadModalClose) {
+        uploadModalClose.addEventListener('click', () => {
+            if (uploadModal) uploadModal.classList.add('modal-hidden');
+            resetUploadForm();
+        });
+    }
+    
+    if (cancelUploadBtn) {
+        cancelUploadBtn.addEventListener('click', () => {
+            if (uploadModal) uploadModal.classList.add('modal-hidden');
+            resetUploadForm();
+        });
+    }
+    
+    if (uploadModal) {
+        uploadModal.addEventListener('click', (e) => {
+            if (e.target === uploadModal) {
+                uploadModal.classList.add('modal-hidden');
+                resetUploadForm();
+            }
+        });
+    }
+    
+    // Click to select file
+    if (uploadArea) {
+        uploadArea.addEventListener('click', () => {
+            if (fileInput) fileInput.click();
+        });
+    }
+    
+    // File input change
+    if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+            handleFileSelect(e.target.files[0]);
+        });
+    }
+    
+    // Drag and drop
+    if (uploadArea) {
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+    }
+    
+    // Remove preview
+    if (removePreviewBtn) {
+        removePreviewBtn.addEventListener('click', () => {
+            resetUploadForm();
+        });
+    }
+    
+    // Upload button
+    if (uploadBtn) {
+        uploadBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+            
+            const userId = await getUserId();
+            if (!userId) {
+                alert('Could not determine user ID. Please log in again.');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'Uploading...';
+            
+            try {
+                const response = await fetch(`http://localhost:6001/api/profile-picture/${userId}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    alert('Profile picture uploaded successfully!');
+                    if (uploadModal) uploadModal.classList.add('modal-hidden');
+                    resetUploadForm();
+                    loadProfilePicture(); // Reload profile picture
+                } else {
+                    alert(`Error: ${result.message || 'Failed to upload profile picture'}`);
+                }
+            } catch (error) {
+                console.error('Failed to upload profile picture:', error);
+                alert('An error occurred while uploading the profile picture. Please try again.');
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = 'Upload';
+            }
+        });
+    }
+    
+    function handleFileSelect(file) {
+        if (!file) return;
+        
+        // Validate file type
+        const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'];
+        if (!validTypes.includes(file.type)) {
+            alert('Invalid file type. Please select an image file (PNG, JPG, JPEG, GIF, or WEBP).');
+            return;
+        }
+        
+        // Validate file size (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('File size exceeds 5MB limit. Please select a smaller image.');
+            return;
+        }
+        
+        selectedFile = file;
+        
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            if (previewImg) {
+                previewImg.src = e.target.result;
+                if (imagePreview) imagePreview.style.display = 'block';
+            }
+            if (uploadArea) uploadArea.style.display = 'none';
+            if (uploadBtn) uploadBtn.disabled = false;
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    function resetUploadForm() {
+        selectedFile = null;
+        if (fileInput) fileInput.value = '';
+        if (imagePreview) imagePreview.style.display = 'none';
+        if (uploadArea) uploadArea.style.display = 'block';
+        if (uploadBtn) uploadBtn.disabled = true;
+        if (uploadArea) uploadArea.classList.remove('drag-over');
+    }
 }

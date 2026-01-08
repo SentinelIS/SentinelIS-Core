@@ -11,3 +11,5 @@ mydb.sqlite
 bin/
 
 obj/
+
+venv/

@@ -17,6 +17,8 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             // remember company id for admin actions
             try {
                 localStorage.setItem('companyId', company);
+                if (data.userId) localStorage.setItem('userId', data.userId);
+                if (data.username) localStorage.setItem('username', data.username);
             } catch (_) {}
             // server can return redirect path
             window.location.href = data.redirect || '/dashboard.html';
@@ -28,6 +30,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             localStorage.setItem('companyId', company);
             localStorage.setItem('username', username);
             localStorage.setItem('password', password);
+            if (data.userId) localStorage.setItem('userId', data.userId);
         } catch (_) {}
     } catch (err) {
         errorEl.textContent = 'Network or server error';

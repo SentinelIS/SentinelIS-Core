@@ -154,7 +154,13 @@ app.post('/api/login', async (req, res) => {
         } catch (fetchErr) {
             console.error('Error sending token to localhost:5137:', fetchErr);
         }
-        return res.json({ success: true, redirect: '/dashboard.html' });
+        return res.json({ 
+            success: true, 
+            redirect: '/dashboard.html',
+            userId: user.USER_ID,
+            companyId: company,
+            username: user.USER_ABBR
+        });
     } catch (err) {
         console.error('Login error:', err);
         return res.status(500).json({ success: false, message: 'Server error: ' + err.message });

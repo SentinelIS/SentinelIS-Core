@@ -97,9 +97,112 @@ main {
     margin-bottom: 30px;
 }
 
+.user-profile-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.profile-picture-container {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: pointer;
+    border: 3px solid var(--border);
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    transition: all 0.3s ease;
+}
+
+.profile-picture-container:hover {
+    border-color: var(--primary);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.profile-picture-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-picture-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 32px;
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+}
+
+.profile-picture-container:hover .profile-picture-placeholder {
+    color: var(--primary);
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+}
+
 .main-header h1 {
     font-size: 28px;
     margin: 0;
+}
+
+/* Upload Area Styles */
+.upload-area {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #f8fafc;
+}
+
+.upload-area:hover {
+    border-color: var(--primary);
+    background: #f1f5f9;
+}
+
+.upload-area.drag-over {
+    border-color: var(--primary);
+    background: #eff6ff;
+    transform: scale(1.02);
+}
+
+.upload-icon {
+    font-size: 48px;
+    color: var(--muted);
+    margin-bottom: 15px;
+}
+
+.upload-area:hover .upload-icon {
+    color: var(--primary);
+}
+
+.upload-area p {
+    margin: 10px 0;
+    color: var(--navy);
+    font-weight: 500;
+}
+
+.upload-hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 5px;
+}
+
+.image-preview {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.image-preview img {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 15px;
 }
 
 .dashboard-sections {

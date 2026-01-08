@@ -42,10 +42,47 @@
 
     <main>
         <div id="dashboard-header" class="main-header">
-            <h1>Welcome, <span id="username">User</span></h1>
+            <div class="user-profile-section">
+                <div class="profile-picture-container" id="profile-picture-container">
+                    <img id="profile-picture" src="" alt="Profile Picture" style="display: none;">
+                    <div id="profile-picture-placeholder" class="profile-picture-placeholder">
+                        <i class="ri-camera-fill"></i>
+                    </div>
+                    <input type="file" id="profile-picture-input" accept="image/*" style="display: none;">
+                </div>
+                <h1>Welcome, <span id="username">User</span></h1>
+            </div>
             <button onclick="window.location.href='http://localhost:3000/adduser.html'">
                 <i class="ri-user-add-fill"></i> Add user
             </button>
+        </div>
+        
+        <!-- Profile Picture Upload Modal -->
+        <div id="profile-upload-modal" class="modal-overlay modal-hidden">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2><i class="ri-image-add-fill"></i> Upload Profile Picture</h2>
+                    <button id="profile-upload-modal-close" class="modal-close"><i class="ri-close-line"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="upload-area" id="upload-area">
+                        <div class="upload-icon">
+                            <i class="ri-upload-cloud-2-fill"></i>
+                        </div>
+                        <p>Drag and drop an image here, or click to select</p>
+                        <p class="upload-hint">Supported formats: PNG, JPG, JPEG, GIF, WEBP (Max 5MB)</p>
+                        <input type="file" id="file-input" accept="image/*" style="display: none;">
+                    </div>
+                    <div id="image-preview" class="image-preview" style="display: none;">
+                        <img id="preview-img" src="" alt="Preview">
+                        <button id="remove-preview" class="danger-btn"><i class="ri-delete-bin-fill"></i> Remove</button>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="cancel-upload-btn" class="secondary-btn">Cancel</button>
+                        <button type="button" id="upload-btn" class="primary-btn" disabled>Upload</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="dashboard-sections">

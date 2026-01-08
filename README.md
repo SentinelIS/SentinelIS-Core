@@ -147,6 +147,20 @@ dotnet clean
 dotnet run
 ```
 
+### Python Server
+
+```python
+# New venv
+python3.12 -m venv venv
+venv\Scripts\activate
+
+# Install dependencies
+pip install -r backend/main/python/requirements.txt
+
+# Run the server
+python backend/main/python/pfp.py
+```
+
 ## Techstack
 ### Frontend
 - Electron (GUI)
@@ -162,6 +176,7 @@ dotnet run
 ### Database
 - MySQL (Relational Database)
 - MongoDB (NoSQL Database)
+- Redis
 
 ### Build & Tools
 - Docker (Containerization)
@@ -171,13 +186,14 @@ dotnet run
 - Python (Test Connection for Databases)
 
 ## In Planing; not used yet
-- Redis
 - Prisma
 - Zod
 - Pino for Logging
 - SQLite for saving binary blobs (for images)
 - ASP .NET for Chat system
 - SignalR for Chat
+- Python
+- Flask
 
 ## Note
 
