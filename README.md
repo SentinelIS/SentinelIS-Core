@@ -154,9 +154,16 @@ If you use Python 3.13 you have to activate Python 3.12 first. Pillow does not w
 
 
 ```python
+# Check installed python versions
+py -0
+
+# if python 3.12 is not installed
+winget install Python.Python.3.12
 # New venv
 python3.12 -m venv venv
-venv\Scripts\activate
+
+# Output you should see:
+# venv\Scripts\activate
 
 # Install dependencies
 pip install -r backend/main/python/requirements.txt
